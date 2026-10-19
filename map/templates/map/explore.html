@@ -1,0 +1,86 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Explore Schools - California Collegiate Esports</title>
+    <!-- Leaflet CSS for Map rendering -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="{% static 'map/css/map.css' %}">
+</head>
+<body class="dark-theme">
+
+    <!-- Navbar Header -->
+    <header class="navbar">
+        <div class="logo">CCE <span>California Collegiate Esports</span></div>
+        <nav class="nav-links">
+            <a href="#">Home Feed</a>
+            <a href="#">Discover</a>
+            <a href="#" class="active">Map</a>
+            <a href="#">Schools</a>
+            <a href="#">Messages</a>
+            <a href="#">Notifications</a>
+        </nav>
+    </header>
+
+    <!-- 3-Column Container -->
+    <div class="map-dashboard-container">
+        
+        <!-- Left Sidebar -->
+        <aside class="panel left-panel">
+            <h2>Explore the map</h2>
+            <div class="search-box">
+                <input type="text" placeholder="Campus or city">
+            </div>
+
+            <div class="filter-section">
+                <label>Games</label>
+                <div class="chip-group">
+                    <span class="chip active">Valorant</span>
+                    <span class="chip">League of Legends</span>
+                    <span class="chip">Overwatch</span>
+                </div>
+            </div>
+
+            <div class="info-card">
+                <p>School pages are wikis. School mods, Captains, and Coaches can submit edits.</p>
+            </div>
+        </aside>
+
+        <!-- Center Map Area -->
+        <main class="panel map-center-panel">
+            <div id="school-map"></div>
+        </main>
+
+        <!-- Right Sidebar -->
+        <aside class="panel right-panel">
+            <div class="school-avatar">SS</div>
+            <h2 id="school-title">Sacramento State</h2>
+            <p class="school-sub">Sacramento • 3.2 mi from downtown</p>
+            
+            <div class="badge-group">
+                <span class="badge badge-purple">6 teams</span>
+                <span class="badge badge-dark">5 games</span>
+            </div>
+
+            <p class="description">
+                Student-led club with an esports lab, weekly open play, and NorCal tournament teams.
+            </p>
+
+            <ul class="team-list">
+                <li>Sac State Gold · Valorant</li>
+                <li>Hornet Hive · Rocket League</li>
+                <li>Stingers · League of Legends</li>
+            </ul>
+
+            <a href="#" class="btn-primary">View school page</a>
+        </aside>
+
+    </div>
+
+    <!-- Leaflet JS & Custom Script -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="{% static 'map/js/map.js' %}"></script>
+</body>
+</html>
