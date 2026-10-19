@@ -1,0 +1,74 @@
+/* Layout */
+.shell{min-height:100vh;display:flex;flex-direction:column;padding:24px 32px 28px;background:radial-gradient(1200px 600px at 50% -10%,#1d1640 0%,#090b10 60%);color:#f4f4f8}
+.brandBar{display:flex;justify-content:space-between;align-items:center;gap:16px}
+.brand{display:inline-flex;align-items:center;gap:10px;font-weight:700;font-size:15px;text-decoration:none;letter-spacing:-.2px}
+.logo{width:34px;height:34px;display:inline-flex;align-items:center;justify-content:center;border-radius:10px;background:#7957fa;color:#fff;font-size:11px;font-weight:800}
+.organization{font-size:12px;color:#83899e}
+.stage{flex:1;display:flex;align-items:center;justify-content:center;padding:40px 0}
+.footer{width:100%;max-width:640px;margin:0 auto;display:grid;gap:10px}
+.notice{display:flex;align-items:flex-start;gap:9px;margin:0;color:#b9b0e8;background:#7957fa1f;border:1px solid #7957fa44;padding:10px 12px;border-radius:10px;font-size:11.5px;line-height:1.5}
+.notice svg{flex:none;color:#ab95ff;margin-top:1px}
+.disclaimer{text-align:center;font-size:11px;color:#71788d;margin:0}
+
+/* Card */
+.card{width:100%;max-width:440px;background:#12141d;border:1px solid #293044;border-radius:20px;padding:32px;box-shadow:0 24px 60px -24px #000c}
+.centered{text-align:center}
+.eyebrow{font-size:11px;letter-spacing:.6px;color:#16dfc5;font-weight:700;margin:0 0 8px}
+.title{font-size:26px;line-height:1.2;letter-spacing:-.5px;margin:0 0 8px;font-weight:750}
+.lead{color:#9198ab;font-size:14px;line-height:1.6;margin:0 0 6px}
+.lead strong{color:#e3e3ee;font-weight:600}
+
+/* Status screens */
+.iconBox{height:56px;width:56px;display:flex;align-items:center;justify-content:center;border-radius:16px;background:#1b1d29;color:#a88aff;margin:0 auto 18px}
+.green{color:#24d6bd}.red{color:#ff5f80}
+.pill{display:inline-block;background:#7957fa;color:#fff;padding:6px 11px;border-radius:22px;font-size:11px;font-weight:700;line-height:1.2;letter-spacing:.3px;margin-bottom:14px}
+.greenPill{background:#22cfa9;color:#06231d}.redPill{background:#ff587b}
+
+/* Form */
+.form{margin-top:22px}
+.field{display:block;margin-top:16px}
+.field:first-child{margin-top:0}
+.label{display:flex;justify-content:space-between;align-items:baseline;color:#aab0c2;font-size:12.5px;font-weight:600;margin-bottom:7px}
+.input{width:100%;height:46px;border:1px solid #30374c;background:#0e1018;color:#f3f3f9;padding:0 14px;border-radius:12px;outline:none;font-size:14px;transition:border-color .16s,box-shadow .16s}
+.input:focus{border-color:#8a69ff;box-shadow:0 0 0 3px #805aff33}
+.input::placeholder{color:#6c7388}
+.input[aria-invalid="true"]{border-color:#ff637e}
+.input[readonly]{color:#aab0c2;cursor:default}
+.hint{font-size:12px;color:#7d8499;margin:7px 0 0}
+.error{color:#ff637e;font-size:12px;margin:7px 0 0}
+.passwordWrap{position:relative}
+.passwordWrap .input{padding-right:44px}
+.visibilityButton{position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:0;color:#9d9fb6;cursor:pointer;padding:6px;display:flex;border-radius:8px}
+.visibilityButton:hover{color:#fff}
+.inlineLink{color:#a88aff;font-size:12.5px;font-weight:600;text-decoration:none}
+.inlineLink:hover{text-decoration:underline}
+
+/* Buttons */
+.actions{display:grid;gap:10px;margin-top:24px}
+.actionsRow{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:24px}
+.button{display:inline-flex;width:100%;min-height:46px;align-items:center;justify-content:center;gap:8px;border-radius:12px;border:0;padding:10px 16px;color:#fff;text-decoration:none;font-size:14px;font-weight:600;cursor:pointer;transition:filter .15s,transform .15s,background .15s}
+.button:hover{filter:brightness(1.12);transform:translateY(-1px)}
+.button:active{transform:none}
+.purple{background:#7957fa}
+.redButton{background:#ff587b}
+.ghost{background:transparent;border:1px solid #30374c;color:#d6d8e3}
+.ghost:hover{background:#1b1d29;filter:none}
+
+.switch{margin:22px 0 0;text-align:center;font-size:13px;color:#9198ab}
+
+/* Account summary (log out) */
+.account{display:flex;align-items:center;gap:12px;background:#0e1018;border:1px solid #293044;border-radius:14px;padding:12px 14px;margin-top:20px;text-align:left}
+.avatar{width:40px;height:40px;display:inline-flex;align-items:center;justify-content:center;border-radius:50%;background:#403381;color:#f3f1ff;font-size:12px;font-weight:700;flex:none}
+.accountName{font-weight:700;font-size:14px}
+.accountEmail{font-size:12.5px;color:#9198ab}
+.warning{font-size:12.5px;color:#ffb35c;margin:14px 0 0}
+
+
+@media(max-width:600px){
+  .shell{padding:18px 16px 22px}
+  .organization{display:none}
+  .stage{padding:28px 0;align-items:flex-start}
+  .card{padding:24px 20px;border-radius:16px}
+  .title{font-size:23px}
+  .actionsRow{grid-template-columns:1fr}
+}
