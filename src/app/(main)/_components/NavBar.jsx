@@ -2,15 +2,14 @@
 
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { Bell, ChevronDown, Compass, House, LogOut, Map as MapIcon, MessageCircle, Search, UserRound } from 'lucide-react';
 import { CURRENT_USER_HANDLE, getPlayer } from '../_data/mockPlayers';
 import styles from '../main.module.css';
 
-// TODO: feed, discover, map, messages and notifications pages don't exist yet,
-// these links will 404 until those tickets are done
+// discover, map, messages and notifications are placeholder pages until those tickets are done
 const LINKS = [
-  { href: '/feed', label: 'Home Feed', icon: House },
+  { href: '/home', label: 'Home Feed', icon: House },
   { href: '/discover', label: 'Discover', icon: Compass, match: ['/discover', '/players'] },
   { href: '/map', label: 'Map', icon: MapIcon },
   { href: '/messages', label: 'Messages', icon: MessageCircle },
@@ -19,6 +18,7 @@ const LINKS = [
 
 export default function NavBar() {
   const pathname = usePathname();
+  const router = useRouter();
   const me = getPlayer(CURRENT_USER_HANDLE);
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef(null);
@@ -36,9 +36,16 @@ export default function NavBar() {
   // close it after navigating too
   useEffect(() => setMenuOpen(false), [pathname]);
 
+  // full results live on the Discover page (Story 3)
+  function handleSearch(event) {
+    event.preventDefault();
+    const text = new FormData(event.currentTarget).get('q').trim();
+    router.push(text ? `/discover?q=${encodeURIComponent(text)}` : '/discover');
+  }
+
   return (
     <header className={styles.nav}>
-      <Link href="/feed" className={styles.brand}>
+      <Link href="/home" className={styles.brand}>
         <span className={styles.logo}>CCE</span>
         <span className={styles.brandName}>California Collegiate Esports</span>
       </Link>
@@ -61,11 +68,11 @@ export default function NavBar() {
       </nav>
 
       <div className={styles.navRight}>
-        <label className={styles.search}>
+        <form className={styles.search} role="search" onSubmit={handleSearch}>
           <Search size={17} />
-          {/* TODO(backend): hook up to search endpoint */}
-          <input type="search" placeholder="Players, teams, schools" aria-label="Search players, teams, schools" />
-        </label>
+          {/* TODO(backend): suggestions dropdown from GET /api/search/suggest (Story 2.5) */}
+          <input type="search" name="q" placeholder="Players, teams, schools" aria-label="Search players, teams, schools" />
+        </form>
 
         <div className={styles.account} ref={menuRef}>
           <button
