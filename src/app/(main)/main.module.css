@@ -1,0 +1,170 @@
+/* Shared styles for the logged-in app. Values come from the Figma frames. */
+.app{
+  --bg:#0a0b10;--surface:#11131b;--surface-2:#191c27;--border:#232838;
+  --text:#f4f4f8;--muted:#9198ab;--faint:#6c7388;
+  --purple:#7957fa;--purple-soft:#7957fa26;--teal:#22d3b0;--orange:#ffb547;
+  min-height:100vh;background:var(--bg);color:var(--text);
+  font-family:var(--font-body),Arial,Helvetica,sans-serif;
+}
+
+/* ---------- Nav ---------- */
+.nav{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:28px;height:72px;padding:0 32px;background:#0d0f15f2;border-bottom:1px solid var(--border);backdrop-filter:blur(10px)}
+.brand{display:inline-flex;align-items:center;gap:10px;text-decoration:none;flex:none}
+.logo{width:34px;height:34px;display:inline-flex;align-items:center;justify-content:center;border-radius:9px;background:var(--purple);color:#fff;font-size:11px;font-weight:800;letter-spacing:.3px}
+.brandName{font-family:var(--font-display),sans-serif;font-weight:700;font-size:17px;letter-spacing:-.2px}
+.navLinks{display:flex;gap:4px}
+.navLink{display:inline-flex;align-items:center;gap:8px;height:40px;padding:0 12px;border-radius:10px;color:#a3a9bb;text-decoration:none;font-size:14.5px;transition:background .15s,color .15s}
+.navLink:hover{color:var(--text);background:var(--surface-2)}
+.navLinkActive{color:var(--text);background:#1d2030}
+.navLinkActive svg{color:#9b80ff}
+.navRight{margin-left:auto;display:flex;align-items:center;gap:14px}
+.search{display:flex;align-items:center;gap:10px;width:260px;height:40px;padding:0 14px;border:1px solid var(--border);border-radius:11px;background:#0b0d13;color:var(--faint);transition:border-color .15s}
+.search:focus-within{border-color:#8a69ff}
+.search input{flex:1;min-width:0;background:none;border:0;outline:none;color:var(--text);font-size:14px}
+.search input::placeholder{color:var(--faint)}
+.account{position:relative}
+.accountButton{display:flex;align-items:center;gap:8px;background:none;border:0;color:var(--muted);cursor:pointer;padding:2px;border-radius:999px}
+.accountButton svg{transition:transform .15s}
+.chevronOpen{transform:rotate(180deg)}
+.menu{position:absolute;right:0;top:calc(100% + 10px);width:220px;padding:6px;background:var(--surface);border:1px solid var(--border);border-radius:14px;box-shadow:0 18px 40px -12px #000d}
+.menuHeader{display:grid;padding:10px 10px 12px;border-bottom:1px solid var(--border);margin-bottom:6px}
+.menuHeader strong{font-size:14px}
+.menuHeader span{font-size:12.5px;color:var(--muted)}
+.menuItem{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:9px;color:#d6d8e3;text-decoration:none;font-size:14px}
+.menuItem:hover{background:var(--surface-2);color:#fff}
+
+/* ---------- Avatars ---------- */
+.avatar{position:relative;display:inline-flex;align-items:center;justify-content:center;flex:none;border-radius:50%;background:#3b2f7a;color:#f3f1ff;font-weight:700}
+.avatarSm{width:40px;height:40px;font-size:12px}
+.avatarMd{width:46px;height:46px;font-size:13px}
+.avatarXl{width:132px;height:132px;font-size:34px;border:4px solid var(--bg);font-family:var(--font-display),sans-serif}
+.onlineDot{position:absolute;right:1px;bottom:1px;width:22%;height:22%;min-width:9px;min-height:9px;border-radius:50%;background:var(--teal);border:2px solid var(--bg)}
+
+/* ---------- Buttons ---------- */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:48px;padding:0 22px;border-radius:12px;border:1px solid transparent;font-size:15px;font-weight:500;color:#fff;text-decoration:none;cursor:pointer;white-space:nowrap;transition:filter .15s,transform .15s,background .15s}
+.btn:hover{filter:brightness(1.12);transform:translateY(-1px)}
+.btn:active{transform:none}
+.btnPrimary{background:var(--purple)}
+.btnSecondary{background:#1d2030e6;color:#e3e4ee}
+.btnOutline{background:#0d0f15cc;border-color:#34394d;color:#e3e4ee}
+.btnTealOutline{background:transparent;border-color:#22d3b099;color:#e3e4ee}
+.btnTealOutline:hover{background:#22d3b01a;filter:none}
+.btnSm{height:38px;padding:0 16px;font-size:14px}
+.iconButton{display:inline-flex;padding:6px;border:0;border-radius:8px;background:none;color:var(--muted);cursor:pointer}
+.iconButton:hover{background:var(--surface-2);color:#fff}
+
+/* ---------- Profile layout ---------- */
+.profile{position:relative;padding-bottom:56px}
+.banner{position:relative;height:252px;background:#141022 center 15%/cover no-repeat}
+.banner::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,#0a0b1000 55%,#0a0b10b3 100%);pointer-events:none}
+/* 252 banner - 48 button - 24 gap */
+.bannerActions{position:absolute;z-index:3;right:40px;top:180px;display:flex;gap:12px}
+.profileGrid{max-width:1440px;margin:0 auto;padding:0 52px;display:grid;grid-template-columns:400px minmax(0,1fr) 356px;gap:28px;align-items:start}
+
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:20px}
+.panelTitle{font-family:var(--font-display),sans-serif;font-size:19px;font-weight:600;margin:0 0 14px;letter-spacing:-.2px}
+
+/* identity column */
+.identity{margin-top:-78px;position:relative;z-index:2}
+.gamertag{display:flex;align-items:center;flex-wrap:wrap;gap:12px;margin:18px 0 10px;font-family:var(--font-display),sans-serif;font-size:36px;line-height:1.1;font-weight:700;letter-spacing:-.6px}
+.roleBadge{padding:6px 12px;border-radius:999px;background:var(--purple);font-family:var(--font-body),sans-serif;font-size:13px;font-weight:600;letter-spacing:.6px;text-transform:uppercase}
+.realName{display:flex;align-items:center;gap:6px;margin:0 0 10px;font-size:13px;color:var(--faint)}
+.schoolLine{margin:0 0 16px;font-size:15px;color:#d6d8e3}
+.tags{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px}
+.tag{padding:8px 13px;border-radius:999px;background:#1f2230;font-size:14px;font-weight:500;color:#e8e9f1}
+.tagPurple{background:var(--purple);color:#fff}
+.tagOrange{background:var(--orange);color:#2b1a00}
+.tagTeal{background:var(--teal);color:#05241d}
+.bio{margin:0 0 20px;font-size:15px;line-height:1.65;color:#e3e4ee}
+.facts{margin:0;padding:10px 22px}
+.facts div{display:flex;justify-content:space-between;gap:12px;padding:9px 0;font-size:14px}
+.facts dt{color:#b9bdcc}
+.facts dd{margin:0;font-weight:600;text-align:right}
+.counts{margin:16px 2px 0;font-size:14px;color:var(--muted)}
+.counts strong{color:var(--text)}
+
+/* overview column */
+.overview{display:grid;gap:20px;padding-top:12px}
+.tabTitle{margin:0;text-align:center;font-size:15px;font-weight:600}
+.timeline{padding:22px 24px}
+.timeline ul{list-style:none;margin:0;padding:0;display:grid;gap:14px}
+.timeline li{display:grid;grid-template-columns:12px 56px 1fr;align-items:center;gap:12px;font-size:14.5px}
+.timelineDot{width:10px;height:10px;border-radius:50%;background:var(--teal);box-shadow:0 0 0 4px #22d3b01f}
+.timelineYear{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:13px;color:#9b80ff}
+.empty{margin:0;padding:28px;text-align:center;color:var(--muted)}
+
+/* post */
+.post{padding:22px 24px 20px}
+.postHeader{display:flex;justify-content:space-between;align-items:flex-start}
+.postAuthor{display:flex;align-items:center;gap:14px;text-decoration:none}
+.postAuthor:hover .postName{text-decoration:underline}
+.postName{display:block;font-size:17px;font-weight:500}
+.postMeta{display:block;font-size:13.5px;color:var(--muted);margin-top:2px}
+.postBody{margin:18px 0;font-size:16px;line-height:1.6}
+.postImage{display:block;width:100%;aspect-ratio:1584/470;object-fit:cover;border-radius:14px}
+.postStats{display:flex;justify-content:space-between;margin:16px 0 14px;font-size:13.5px;color:var(--muted)}
+.likes{display:inline-flex;align-items:center;gap:6px}
+.postActions{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.postAction{display:inline-flex;align-items:center;justify-content:center;gap:9px;height:44px;border:0;border-radius:10px;background:#151823;color:#c9ccd8;font-size:14.5px;font-weight:500;cursor:pointer;transition:background .15s,color .15s}
+.postAction:hover{background:#1d2030;color:#fff}
+.postActionOn{color:#ff6b8a}
+.postActionOn:hover{color:#ff6b8a}
+
+/* right column */
+.sidebar{display:grid;gap:18px;padding-top:2px}
+.interests{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;padding:12px 18px}
+.chip{padding:8px 13px;border-radius:999px;background:#1f2230;font-size:14px;font-weight:500}
+.privacy{margin:0;padding:14px 22px;border-radius:12px;background:var(--teal);color:#05241d;font-size:13.5px;line-height:1.45}
+.stat{display:grid;gap:10px;padding:24px 22px}
+.stat strong{font-family:var(--font-display),sans-serif;font-size:34px;line-height:1;font-weight:700}
+.stat span{font-size:14px;color:#b9bdcc}
+.sidebar > .panel:last-child:has(.suggestions){padding:20px}
+.suggestions{list-style:none;margin:0;padding:0;display:grid;gap:12px}
+.suggestion{display:flex;align-items:center;gap:12px;padding:12px;border:1px solid var(--border);border-radius:14px;background:#0f1118}
+.suggestionText{flex:1;min-width:0;display:grid}
+.suggestionText strong{font-size:15px;font-weight:600}
+.suggestionText span{font-size:13px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* not found */
+.notFound{display:flex;justify-content:center;padding:96px 16px}
+.notFoundCard{max-width:420px;padding:32px;text-align:center;color:#a88aff}
+.notFoundCard h1{margin-top:12px;color:var(--text)}
+.notFoundCard p{color:var(--muted);margin:0 0 22px;font-size:14.5px}
+.notFoundActions{display:flex;justify-content:center;gap:10px;flex-wrap:wrap}
+
+/* ---------- Responsive ---------- */
+@media(max-width:1280px){
+  .nav{gap:16px;padding:0 20px}
+  .brandName{display:none}
+  .search{width:200px}
+  .profileGrid{grid-template-columns:340px minmax(0,1fr);padding:0 32px}
+  .sidebar{grid-column:1;grid-row:2}
+  .overview{grid-row:1 / span 2;grid-column:2}
+}
+@media(max-width:900px){
+  .navLink span{display:none}
+  .search{display:none}
+  .profileGrid{grid-template-columns:1fr;padding:0 20px;gap:22px}
+  .sidebar,.overview{grid-column:auto;grid-row:auto}
+  .overview{padding-top:0}
+  .tabTitle{text-align:left}
+}
+@media(max-width:640px){
+  .nav{height:60px;padding:0 16px;gap:8px}
+  .navLinks{gap:0}
+  .navLink{padding:0 9px}
+  /* flatten the grid so the buttons can go between the name and the overview */
+  .profile{display:flex;flex-direction:column}
+  .profileGrid{display:contents}
+  .banner{height:170px}
+  .identity,.bannerActions,.overview,.sidebar{margin-left:16px;margin-right:16px}
+  .identity{order:1;margin-top:-60px}
+  .bannerActions{order:2;position:static;margin-top:18px;margin-bottom:24px}
+  .bannerActions > *{flex:1;height:44px;padding:0 12px;font-size:14px}
+  .overview{order:3;margin-bottom:22px}
+  .sidebar{order:4}
+  .avatarXl{width:104px;height:104px;font-size:28px}
+  .gamertag{font-size:30px}
+  .post{padding:18px 16px}
+  .postActions{gap:8px}
+}
