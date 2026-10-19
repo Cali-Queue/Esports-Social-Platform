@@ -1,0 +1,144 @@
+:root {
+    --bg-dark: #0a0c10;
+    --panel-bg: #11151f;
+    --border-color: #1e2433;
+    --accent-purple: #7053ff;
+    --accent-teal: #00e5a3;
+    --text-main: #f0f4fc;
+    --text-muted: #808a9d;
+}
+
+body.dark-theme {
+    background-color: var(--bg-dark);
+    color: var(--text-main);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+/* Header Navbar */
+.navbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: var(--panel-bg);
+    padding: 14px 24px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.navbar .logo {
+    font-weight: bold;
+}
+
+.nav-links a {
+    color: var(--text-muted);
+    text-decoration: none;
+    margin-left: 20px;
+}
+
+.nav-links a.active {
+    color: var(--text-main);
+    background-color: #1e2538;
+    padding: 6px 12px;
+    border-radius: 6px;
+}
+
+/* Grid Layout */
+.map-dashboard-container {
+    display: grid;
+    grid-template-columns: 280px 1fr 320px;
+    gap: 16px;
+    padding: 16px;
+    height: calc(100vh - 100px);
+}
+
+.panel {
+    background-color: var(--panel-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+/* Center Map */
+.map-center-panel {
+    padding: 0;
+    overflow: hidden;
+}
+
+#school-map {
+    width: 100%;
+    height: 100%;
+}
+
+/* Search and Inputs */
+.search-box input {
+    width: 100%;
+    padding: 10px;
+    background-color: #0d1017;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    color: white;
+    box-sizing: border-box;
+}
+
+.chip-group {
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.chip {
+    background-color: #1a202c;
+    padding: 6px 12px;
+    border-radius: 16px;
+    font-size: 12px;
+}
+
+.chip.active {
+    background-color: var(--accent-purple);
+}
+
+.info-card {
+    background-color: #1a2035;
+    padding: 12px;
+    border-radius: 8px;
+    margin-top: 24px;
+    font-size: 13px;
+    color: #a0aec0;
+}
+
+/* Right Panel Elements */
+.school-avatar {
+    width: 48px;
+    height: 48px;
+    background-color: var(--accent-teal);
+    color: #000;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+}
+
+.badge {
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    margin-right: 6px;
+}
+
+.badge-purple { background-color: var(--accent-purple); }
+.badge-dark { background-color: #2d3748; }
+
+.btn-primary {
+    display: block;
+    text-align: center;
+    background-color: var(--accent-purple);
+    color: white;
+    padding: 12px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: bold;
+    margin-top: 24px;
+}
