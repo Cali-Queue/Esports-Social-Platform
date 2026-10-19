@@ -8,7 +8,7 @@ export default function AuthLayout({ children }) {
   return (
     <main className={styles.shell}>
       <header className={styles.brandBar}>
-        <Link href="/signup" className={styles.brand}>
+        <Link href="/" className={styles.brand}>
           <span className={styles.logo}>CQ</span>
           Cali Queue
         </Link>

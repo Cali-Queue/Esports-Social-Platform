@@ -1,20 +1,23 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import TextField from '../_components/TextField';
 import PasswordField from '../_components/PasswordField';
 import styles from '../auth.module.css';
 
 export default function LoginPage() {
+  const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
   function handleSubmit(event) {
     event.preventDefault();
     // TODO(backend): send email + password to the login endpoint.
-    // on success redirect to the home page (doesn't exist yet),
-    // on failure show an error under the password field
+    // on failure show an error under the password field.
+    // For now just go to the logged-in home page.
+    router.push('/home');
   }
 
   return (

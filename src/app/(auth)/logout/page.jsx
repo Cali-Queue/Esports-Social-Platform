@@ -25,8 +25,8 @@ export default function LogoutPage() {
 
       <div className={styles.actionsRow}>
         <button type="button" className={`${styles.button} ${styles.ghost}`} onClick={() => router.back()}>Cancel</button>
-        {/* TODO(backend): clear the session and redirect to /login */}
-        <button type="button" className={`${styles.button} ${styles.redButton}`}>Log out</button>
+        {/* TODO(backend): clear the session before redirecting */}
+        <button type="button" className={`${styles.button} ${styles.redButton}`} onClick={() => router.push('/')}>Log out</button>
       </div>
     </section>
   );
