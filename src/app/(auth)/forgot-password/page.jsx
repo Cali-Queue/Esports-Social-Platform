@@ -8,14 +8,18 @@ import styles from '../auth.module.css';
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('');
   const [submitted, setSubmitted] = useState(false);
+  const [error, setError] = useState('');
 
     function handleSubmit(event) {
       event.preventDefault();
 
       if (!email.trim() || !email.includes('@')) {
+        setError('Please enter a valid college email address.');
+        setSubmitted(false);
         return;
       }
 
+      setError('');
       setSubmitted(true);
     }
 
@@ -45,6 +49,12 @@ export default function ForgotPasswordPage() {
         <p className={styles.lead} role="status">
           If an account exists for {email}, a password reset link
           will be sent to that address.
+        </p>
+      )}
+
+      {error && (
+        <p className={styles.lead} role="alert">
+          {error}
         </p>
       )}
 
