@@ -13,7 +13,7 @@ export default function ForgotPasswordPage() {
     function handleSubmit(event) {
       event.preventDefault();
 
-      if (!email.trim() || !email.includes('@')) {
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
         setError('Please enter a valid college email address.');
         setSubmitted(false);
         return;
