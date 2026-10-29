@@ -11,6 +11,11 @@ export default function ForgotPasswordPage() {
 
     function handleSubmit(event) {
       event.preventDefault();
+
+      if (!email.trim() || !email.includes('@')) {
+        return;
+      }
+
       setSubmitted(true);
     }
 
