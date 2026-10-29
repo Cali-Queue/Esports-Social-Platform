@@ -7,12 +7,12 @@ import styles from '../auth.module.css';
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('');
+  const [submitted, setSubmitted] = useState(false);
 
-  function handleSubmit(event) {
-    event.preventDefault();
-    // TODO(backend): send the reset email. Should show the same message whether
-    // or not the email exists so people can't check who has an account
-  }
+    function handleSubmit(event) {
+      event.preventDefault();
+      setSubmitted(true);
+    }
 
   return (
     <section className={styles.card}>
@@ -35,6 +35,13 @@ export default function ForgotPasswordPage() {
           <button className={`${styles.button} ${styles.purple}`} type="submit">Send reset link</button>
         </div>
       </form>
+
+      {submitted && (
+        <p className={styles.lead} role="status">
+          If an account exists for {email}, a password reset link
+          will be sent to that address.
+        </p>
+      )}
 
       <p className={styles.switch}>
         Remembered it? <Link href="/login" className={styles.inlineLink}>Back to log in</Link>
