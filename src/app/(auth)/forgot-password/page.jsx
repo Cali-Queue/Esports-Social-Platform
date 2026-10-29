@@ -37,7 +37,11 @@ export default function ForgotPasswordPage() {
           autoComplete="email"
           placeholder="you@csus.edu"
           value={email}
-          onChange={(event) => setEmail(event.target.value)}
+          onChange={(event) => {
+            setEmail(event.target.value);
+            setSubmitted(false);
+            setError('');
+          }}
         />
 
         <div className={styles.actions}>
