@@ -1,15 +1,15 @@
 'use client';
 
-import { useState } from 'react';
 import Link from 'next/link';
 import { Check, Clock, UserCheck, UserPlus } from 'lucide-react';
+import { useFollows } from '../../_components/FollowProvider';
 import { useFriendRequests } from '../../_components/FriendRequestsProvider';
 import styles from '../../main.module.css';
 
-// Follow only changes local state for now.
-// TODO(backend): POST follow, and load the initial follow state from the API
+// Follow is shared with the home feed through FollowProvider, friend requests through FriendRequestsProvider.
 export default function PlayerActions({ handle }) {
-  const [following, setFollowing] = useState(false);
+  const { isFollowing, toggleFollow } = useFollows();
+  const following = isFollowing(handle);
   const { ready, relationshipWith, sendRequest } = useFriendRequests();
   const status = relationshipWith(handle);
 
@@ -18,7 +18,7 @@ export default function PlayerActions({ handle }) {
       <button
         type="button"
         className={`${styles.btn} ${styles.btnPrimary}`}
-        onClick={() => setFollowing(!following)}
+        onClick={() => toggleFollow(handle)}
         aria-pressed={following}
       >
         {following && <Check size={16} />}

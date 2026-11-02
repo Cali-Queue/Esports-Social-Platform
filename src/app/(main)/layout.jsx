@@ -1,5 +1,6 @@
 import { Inter, Space_Grotesk } from 'next/font/google';
 import NavBar from './_components/NavBar';
+import { FollowProvider } from './_components/FollowProvider';
 import { FriendRequestsProvider } from './_components/FriendRequestsProvider';
 import styles from './main.module.css';
 
@@ -13,7 +14,9 @@ export default function MainLayout({ children }) {
     <div className={`${styles.app} ${inter.variable} ${spaceGrotesk.variable}`}>
       <FriendRequestsProvider>
         <NavBar />
-        <main>{children}</main>
+        <FollowProvider>
+          <main>{children}</main>
+        </FollowProvider>
       </FriendRequestsProvider>
     </div>
   );
