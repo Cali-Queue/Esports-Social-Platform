@@ -1,0 +1,78 @@
+/* First-time profile setup. Values come from the Figma frame.
+   Vertical sizes use clamp(..vh..) so the whole flow fits on one screen without scrolling. */
+.shell{
+  --bg:#0a0b10;--surface:#11131b;--surface-2:#191c27;--border:#232838;
+  --text:#f4f4f8;--muted:#9198ab;--faint:#5c6276;
+  --purple:#7957fa;--teal:#22d3b0;
+  height:100vh;overflow:hidden;background:var(--bg);color:var(--text);
+  font-family:var(--font-body),Arial,Helvetica,sans-serif;
+}
+.page{height:100%;padding:clamp(16px,2.6vh,28px) 36px}
+
+/* ---------- Header ---------- */
+.header{display:flex;justify-content:space-between;align-items:flex-start;gap:16px}
+.eyebrow{margin:0 0 6px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12px;letter-spacing:.6px;text-transform:uppercase;color:var(--teal)}
+.title{margin:0;font-family:var(--font-display),sans-serif;font-size:clamp(26px,4.5vh,40px);font-weight:700;letter-spacing:-.6px;line-height:1.1}
+
+/* ---------- Progress ---------- */
+.progress{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:clamp(14px,3vh,32px) 0 clamp(12px,2.4vh,26px)}
+.progressBar{height:6px;border-radius:999px;background:#1d2130}
+.progressBarDone{background:var(--purple)}
+
+/* ---------- Step cards ---------- */
+/* minmax(0,1fr) so a column can't be pushed wider than its share by its inputs */
+.steps{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;align-items:start}
+.steps > li{min-width:0}
+.card{min-width:0;overflow:hidden;background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:clamp(12px,2vh,22px) clamp(14px,1.6vw,22px)}
+.cardCurrent{background:#1a1830;border-color:#2e2a4d}
+.cardTop{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:clamp(8px,1.4vh,14px)}
+.stepNumber{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12px;color:#9b80ff}
+.badge{padding:6px 11px;border-radius:999px;font-size:12px;font-weight:700;letter-spacing:.3px;text-transform:uppercase;line-height:1.1}
+.badgeComplete{background:var(--teal);color:#06231d}
+.badgeCurrent{background:var(--purple);color:#fff}
+.badgeNext{background:#232838;color:#e3e5ee}
+.cardTitle{margin:0 0 clamp(6px,1.2vh,12px);font-family:var(--font-display),sans-serif;font-size:clamp(17px,2.4vh,22px);font-weight:600}
+.cardDescription{margin:0 0 clamp(10px,2vh,20px);font-size:14px;color:var(--muted);line-height:1.5}
+
+/* ---------- Buttons ---------- */
+.button{display:inline-flex;align-items:center;justify-content:center;height:clamp(36px,5vh,44px);padding:0 18px;border-radius:12px;border:0;font-size:15px;font-weight:500;text-decoration:none;cursor:pointer;transition:background .15s,filter .15s}
+.ghost{background:transparent;border:1px solid #30374c;color:#e3e5ee}
+.ghost:hover{background:var(--surface-2)}
+.purple{background:var(--purple);color:#fff}
+.purple:hover{filter:brightness(1.12)}
+
+/* ---------- Bio & account form ---------- */
+.form{display:grid;grid-template-columns:minmax(0,1fr);gap:clamp(8px,1.6vh,16px);min-width:0}
+.media{display:flex;align-items:center;gap:10px;min-width:0}
+.fileInput{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
+.avatarUpload{position:relative;width:clamp(44px,6.5vh,60px);height:clamp(44px,6.5vh,60px);flex:none;display:inline-flex;align-items:center;justify-content:center;border-radius:50%;background:#3b2f7a;color:#f3f1ff;font-size:15px;font-weight:700;cursor:pointer;transition:filter .15s}
+.bannerUpload{position:relative;flex:1;min-width:0;height:clamp(44px,6.5vh,60px);display:flex;align-items:center;justify-content:center;gap:8px;border-radius:12px;background:#3d2f7c;color:#cfc4ff;font-size:14px;cursor:pointer;overflow:hidden;white-space:nowrap;padding:0 10px;transition:filter .15s}
+.bannerUpload svg{flex:none}
+.bannerUpload span{overflow:hidden;text-overflow:ellipsis}
+.avatarUpload:hover,.bannerUpload:hover{filter:brightness(1.15)}
+.preview{margin-bottom:clamp(10px,1.8vh,16px)}
+.preview > span{cursor:default;filter:none !important}
+.avatarUpload:focus-within,.bannerUpload:focus-within{outline:2px solid #9b80ff;outline-offset:2px}
+.field{display:grid;grid-template-columns:minmax(0,1fr);gap:6px;min-width:0}
+.label{font-size:14px;color:var(--muted)}
+.input{display:block;width:100%;min-width:0;max-width:100%;height:clamp(36px,5vh,46px);padding:0 14px;border:1px solid #2a2f40;border-radius:12px;background:#0e1018;color:var(--text);font-size:15px;outline:none;transition:border-color .15s}
+.input:focus{border-color:#8a69ff}
+.input::placeholder{color:#5c6276}
+.textarea{height:clamp(78px,10vh,96px);padding:10px 14px;resize:none;line-height:1.5;overflow-y:auto;scrollbar-width:thin;scrollbar-color:#30374c transparent}
+.hint{margin:0;font-size:12px;color:var(--faint)}
+.form .purple{justify-self:start}
+
+/* ---------- School form ---------- */
+.selectWrap{position:relative;min-width:0}
+.select{appearance:none;padding-right:38px;cursor:pointer;text-overflow:ellipsis}
+.select:invalid{color:#5c6276}
+.select option{background:#0e1018;color:var(--text)}
+.selectIcon{position:absolute;right:14px;top:50%;transform:translateY(-50%);color:var(--muted);pointer-events:none}
+.verifyNote{display:flex;align-items:flex-start;gap:7px;margin:0;font-size:12px;line-height:1.45;color:#b9b0e8}
+.verifyNote svg{flex:none;margin-top:1px;color:#ab95ff}/* Phones/narrow windows can't fit four columns on one screen, so let them scroll. */
+@media(max-width:800px){
+  .shell{height:auto;min-height:100vh;overflow:visible}
+  .page{height:auto;padding:20px 16px 40px}
+  .header{flex-direction:column}
+  .steps{grid-template-columns:minmax(0,1fr)}
+}
