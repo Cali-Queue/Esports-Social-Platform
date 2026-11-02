@@ -1,0 +1,306 @@
+
+.page {
+  --bg-dark: #0a0c10;
+  --panel-bg: #11151f;
+  --border-color: #1e2433;
+  --accent-purple: #7053ff;
+  --accent-teal: #00e5a3;
+  --accent-orange: #ffb547;
+  --hero-green: #163a32;
+  --hero-avatar: #17694f;
+  --text-main: #f0f4fc;
+  --text-muted: #808a9d;
+ 
+  min-height: 100vh;
+  background-color: var(--bg-dark);
+  color: var(--text-main);
+}
+ 
+.page h1,
+.page h2,
+.page h3,
+.page p {
+  margin: 0;
+}
+ 
+/* School Banner */
+.hero {
+  background-color: var(--hero-green);
+  padding: 60px 32px 34px;
+}
+ 
+.heroInner {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+ 
+.heroAvatar {
+  width: 84px;
+  height: 84px;
+  flex: none;
+  border-radius: 16px;
+  background-color: var(--hero-avatar);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26px;
+  font-weight: 800;
+}
+ 
+.heroTitleRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+ 
+.heroTitle {
+  font-size: 32px;
+  letter-spacing: -0.5px;
+}
+ 
+.followButton {
+  margin-left: auto;
+  background-color: var(--accent-purple);
+  color: white;
+  border: none;
+  padding: 12px 18px;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+}
+ 
+.followButton:hover {
+  filter: brightness(1.12);
+}
+ 
+/*  Tabs  */
+.tabs {
+  display: flex;
+  gap: 26px;
+  padding: 18px 32px;
+  border-bottom: 1px solid var(--border-color);
+  overflow-x: auto;
+}
+ 
+.tabs a {
+  color: var(--text-muted);
+  text-decoration: none;
+  font-size: 13px;
+  white-space: nowrap;
+}
+ 
+.tabs a:hover {
+  color: var(--text-main);
+}
+ 
+.tabs a.activeTab {
+  color: var(--text-main);
+  font-weight: bold;
+}
+ 
+/* ---------- Layout ---------- */
+.contentGrid {
+  display: grid;
+  grid-template-columns: 1fr 310px;
+  gap: 16px;
+  padding: 24px;
+}
+ 
+.column {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+ 
+.panel {
+  background-color: var(--panel-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 20px;
+}
+ 
+/* Team Cards */
+.teamsGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+ 
+.teamCard {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  transition: border-color 0.2s, transform 0.2s;
+}
+ 
+.teamCard:hover {
+  border-color: #7053ff88;
+  transform: translateY(-3px);
+}
+ 
+.teamAvatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background-color: #3a2f7a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: bold;
+  margin-bottom: 16px;
+}
+ 
+.teamName {
+  font-size: 15px;
+  margin-bottom: 10px !important;
+}
+ 
+.teamGame {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-bottom: 12px !important;
+}
+ 
+/*  Badges/ Buttons */
+.badge {
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+}
+ 
+.badgePurple {
+  background-color: var(--accent-purple);
+}
+ 
+.badgeTeal {
+  background-color: var(--accent-teal);
+  color: #04221a;
+  font-weight: 600;
+}
+ 
+.ghostButton {
+  margin-top: 14px;
+  padding: 10px 16px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  color: var(--text-muted);
+  text-decoration: none;
+  font-size: 13px;
+}
+ 
+.ghostButton:hover {
+  color: var(--text-main);
+  background-color: #1a2035;
+}
+ 
+.darkButton {
+  background-color: #1a2035;
+  color: var(--text-main);
+  border: none;
+  padding: 12px 38px;
+  border-radius: 8px;
+  font-size: 14px;
+  cursor: pointer;
+}
+ 
+.darkButton:hover {
+  background-color: #222a44;
+}
+ 
+/*  Events  */
+.panelTitle {
+  font-size: 16px;
+  margin-bottom: 14px !important;
+}
+ 
+.eventRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+ 
+.datePill {
+  min-width: 64px;
+  text-align: center;
+}
+ 
+.eventTitle {
+  font-size: 13px;
+}
+ 
+.eventMeta {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+ 
+/* ---------- Sidebar ---------- */
+.infoRow {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  padding: 6px 0;
+}
+ 
+.infoValue {
+  color: var(--text-muted);
+}
+ 
+.wikiTag {
+  display: inline-block;
+  background-color: var(--accent-orange);
+  color: #1a1200;
+  font-size: 12px;
+  padding: 6px 10px;
+  border-radius: 10px;
+}
+ 
+.wikiText {
+  font-size: 12px;
+  line-height: 1.5;
+  color: #a0aec0;
+  margin: 14px 0 18px !important;
+}
+ 
+.notice {
+  margin-top: 14px;
+  background-color: var(--accent-orange);
+  color: #1a1200;
+  font-size: 12px;
+  padding: 10px 14px;
+  border-radius: 8px;
+}
+ 
+/*  Responsive  */
+@media (max-width: 1000px) {
+  .contentGrid {
+    grid-template-columns: 1fr;
+  }
+  .teamsGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+ 
+@media (max-width: 640px) {
+  .teamsGrid {
+    grid-template-columns: 1fr;
+  }
+  .heroInner {
+    flex-wrap: wrap;
+  }
+  .followButton {
+    margin-left: 0;
+  }
+  .hero {
+    padding: 40px 16px 24px;
+  }
+  .tabs,
+  .contentGrid {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+}
