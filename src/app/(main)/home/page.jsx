@@ -2,11 +2,12 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { Bookmark, Calendar, Compass, Gamepad2, Map, MessageCircle, Users } from 'lucide-react';
+import { Bookmark, Calendar, ChevronDown, Compass, Gamepad2, Map, MessageCircle, Users } from 'lucide-react';
 import Composer from '../_components/Composer';
+import { useFollows } from '../_components/FollowProvider';
 import HomePostCard from './HomePostCard';
 import { CURRENT_USER_HANDLE, getPlayer, players } from '../_data/mockPlayers';
-import { myTeams, posts as initialPosts, recruitingTeams, upcomingEvents } from '../_data/homeFeed';
+import { followableTeams, getFollowTarget, initialFollowing, myTeams, posts as initialPosts, recruitingTeams, upcomingEvents } from '../_data/homeFeed';
 import styles from './home.module.css';
 
 const TABS = [
@@ -14,23 +15,30 @@ const TABS = [
   { id: 'foryou', label: 'For You' },
 ];
 
+// Following section shows this many before "View more"
+const FOLLOWING_PREVIEW = 3;
+
 export default function HomePage() {
   // TODO(backend): get the logged-in user from the session instead of mock data
   const me = getPlayer(CURRENT_USER_HANDLE);
   // TODO(backend): real suggestions endpoint
-  const suggested = Object.values(players).filter((p) => p.handle !== me.handle);
+  const suggested = Object.values(players).filter((p) => p.handle !== me.handle && !initialFollowing.includes(p.handle));
 
   const [tab, setTab] = useState('following');
   const [posts, setPosts] = useState(initialPosts);
-  const [followed, setFollowed] = useState({});
+  const { isFollowing } = useFollows();
 
   // TODO(backend): replace with GET /api/feed?tab=... (Story 2.2)
-  const visible = posts.filter((post) => post.tab.includes(tab));
+  const visible = posts.filter((post) => {
+    if (tab === 'foryou') return post.forYou;
+    const { handle, teamId } = post.author;
+    return post.mine || myTeams.some((team) => team.id === teamId) || isFollowing(handle ?? teamId);
+  });
 
   function addPost(text) {
     const post = {
       id: `local-${Date.now()}`,
-      tab: ['following', 'foryou'],
+      forYou: true,
       author: { displayName: me.gamertag, handle: me.handle, initials: me.initials, school: me.school, role: me.role },
       text,
       likeCount: 0,
@@ -66,7 +74,9 @@ export default function HomePage() {
           </div>
         </section>
 
-        <nav className={styles.panel} aria-label="Shortcuts">
+        <NetworkPanel />
+
+        <nav className={`${styles.panel} ${styles.shortcuts}`} aria-label="Shortcuts">
           <h2 className={styles.panelTitle}>Shortcuts</h2>
           <Link href="/friends" className={styles.shortcut}><Users size={16} /> Friends</Link>
           <Link href="/messages" className={styles.shortcut}><MessageCircle size={16} /> Messages</Link>
@@ -74,25 +84,10 @@ export default function HomePage() {
           <Link href="/map" className={styles.shortcut}><Map size={16} /> Campus map</Link>
           <Link href="/saved" className={styles.shortcut}><Bookmark size={16} /> Saved posts</Link>
         </nav>
-
-        <section className={styles.panel}>
-          <h2 className={styles.panelTitle}>Your teams</h2>
-          {myTeams.map((team) => (
-            <Link key={team.id} href="/teams" className={styles.teamRow}>
-              <span className={styles.teamIcon}><Gamepad2 size={16} /></span>
-              <span className={styles.rowText}>
-                <span className={styles.rowTitle}>{team.name}</span>
-                <span className={styles.rowMeta}>{team.game} · {team.role}</span>
-              </span>
-            </Link>
-          ))}
-        </section>
       </aside>
 
       {/* Center column: the feed */}
       <section className={styles.feed} aria-label="Feed">
-        <Composer user={me} onPost={addPost} />
-
         <div className={styles.tabs} role="tablist" aria-label="Feed">
           {TABS.map(({ id, label }) => (
             <button
@@ -107,6 +102,8 @@ export default function HomePage() {
             </button>
           ))}
         </div>
+
+        <Composer user={me} onPost={addPost} />
 
         {visible.length === 0 ? (
           <div className={styles.empty}>
@@ -152,14 +149,7 @@ export default function HomePage() {
                 <span className={styles.rowTitle}>{player.gamertag}</span>
                 <span className={styles.rowMeta}>{player.school} · {player.game}</span>
               </Link>
-              <button
-                type="button"
-                className={followed[player.handle] ? styles.followingButton : styles.followButton}
-                aria-pressed={!!followed[player.handle]}
-                onClick={() => setFollowed({ ...followed, [player.handle]: !followed[player.handle] })}
-              >
-                {followed[player.handle] ? 'Following' : 'Follow'}
-              </button>
+              <FollowButton id={player.handle} label={player.gamertag} />
             </div>
           ))}
         </section>
@@ -169,18 +159,85 @@ export default function HomePage() {
             <h2 className={styles.panelTitle}>Teams recruiting</h2>
             <Link href="/discover" className={styles.panelLink}>Browse</Link>
           </div>
-          {recruitingTeams.map((team) => (
-            <Link key={team.id} href="/discover" className={styles.teamRow}>
+          {recruitingTeams.map(({ id, need }) => (
+            <div key={id} className={styles.personRow}>
               <span className={`${styles.teamIcon} ${styles.teamIconTeal}`}><Calendar size={16} /></span>
-              <span className={styles.rowText}>
-                <span className={styles.rowTitle}>{team.name}</span>
-                <span className={styles.rowMeta}>{team.meta}</span>
-                <span className={styles.recruitTag}>{team.need}</span>
-              </span>
-            </Link>
+              <Link href="/discover" className={styles.rowText}>
+                <span className={styles.rowTitle}>{followableTeams[id].name}</span>
+                <span className={styles.rowMeta}>{followableTeams[id].meta}</span>
+                <span className={styles.recruitTag}>{need}</span>
+              </Link>
+              <FollowButton id={id} label={followableTeams[id].name} />
+            </div>
           ))}
         </section>
       </aside>
     </div>
+  );
+}
+
+// My Team and Following sections (Figma frame 16)
+function NetworkPanel() {
+  const { following } = useFollows();
+  const [expanded, setExpanded] = useState(false);
+  const targets = following.map(getFollowTarget).filter(Boolean);
+  const shown = expanded ? targets : targets.slice(0, FOLLOWING_PREVIEW);
+
+  return (
+    <section className={`${styles.panel} ${styles.network}`}>
+      <div className={styles.networkGroup}>
+        <h2 className={styles.sectionTitle}>My Team</h2>
+        {myTeams.map((team) => (
+          <Link key={team.id} href="/teams" className={styles.teamRow}>
+            <span className={styles.teamIcon}><Gamepad2 size={16} /></span>
+            <span className={styles.rowText}>
+              <span className={styles.rowTitle}>{team.name}</span>
+              <span className={styles.rowMeta}>{team.game} · {team.role}</span>
+            </span>
+          </Link>
+        ))}
+      </div>
+
+      <div className={styles.networkGroup}>
+        <h2 className={styles.sectionTitle}>Following</h2>
+        {targets.length === 0 && (
+          <p className={styles.networkEmpty}>
+            You aren’t following anyone yet. <Link href="/discover" className={styles.panelLink}>Find teams and players</Link>
+          </p>
+        )}
+        {shown.map((target) => (
+          <Link key={target.id} href={target.href} className={styles.teamRow}>
+            <span className={`${styles.avatar} ${styles.avatarRow} ${target.isTeam ? styles.avatarTeam : ''}`}>{target.initials}</span>
+            <span className={styles.rowText}>
+              <span className={styles.rowTitle}>{target.name}</span>
+              <span className={styles.rowMeta}>{target.meta}</span>
+            </span>
+          </Link>
+        ))}
+        {targets.length > FOLLOWING_PREVIEW && (
+          <button type="button" className={styles.viewMore} aria-expanded={expanded} onClick={() => setExpanded(!expanded)}>
+            <ChevronDown size={16} className={expanded ? styles.chevronOpen : ''} />
+            {expanded ? 'View less' : 'View more'}
+          </button>
+        )}
+      </div>
+    </section>
+  );
+}
+
+function FollowButton({ id, label }) {
+  const { isFollowing, toggleFollow } = useFollows();
+  const following = isFollowing(id);
+
+  return (
+    <button
+      type="button"
+      className={following ? styles.followingButton : styles.followButton}
+      aria-pressed={following}
+      aria-label={`Follow ${label}`}
+      onClick={() => toggleFollow(id)}
+    >
+      {following ? 'Following' : 'Follow'}
+    </button>
   );
 }

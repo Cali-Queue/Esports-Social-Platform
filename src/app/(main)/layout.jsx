@@ -1,5 +1,6 @@
 import { Inter, Space_Grotesk } from 'next/font/google';
 import NavBar from './_components/NavBar';
+import { FollowProvider } from './_components/FollowProvider';
 import styles from './main.module.css';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-body' });
@@ -11,7 +12,9 @@ export default function MainLayout({ children }) {
   return (
     <div className={`${styles.app} ${inter.variable} ${spaceGrotesk.variable}`}>
       <NavBar />
-      <main>{children}</main>
+      <FollowProvider>
+        <main>{children}</main>
+      </FollowProvider>
     </div>
   );
 }
