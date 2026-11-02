@@ -2,11 +2,11 @@ import Link from 'next/link';
 import { ChevronDown } from 'lucide-react';
 import styles from '../setup.module.css';
 
-// TODO(backend): load games from the server
+// TODO(backend): load games from the server, maybe this can be typed instead(TBD)
 const games = ['Valorant', 'League of Legends', 'Overwatch 2', 'Rocket League', 'Super Smash Bros. Ultimate'];
 
-// Step 3 form: team and game.
-// UI only — nothing is saved yet.
+// Step 3 form: team and game
+// UI only
 export default function TeamGamesStep({ nextHref }) {
   return (
     <form className={styles.form}>

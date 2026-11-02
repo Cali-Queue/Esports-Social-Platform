@@ -1,8 +1,8 @@
 import Link from 'next/link';
 import styles from '../setup.module.css';
 
-// Step 4 form: interests as free text for now.
-// UI only — nothing is saved yet.
+// Step 4 form: interests as free text for now (maybe tab selections tbd...)
+// UI only
 export default function InterestsStep({ nextHref }) {
   return (
     <form className={styles.form}>

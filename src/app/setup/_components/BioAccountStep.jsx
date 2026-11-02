@@ -2,8 +2,8 @@ import Link from 'next/link';
 import { ImagePlus } from 'lucide-react';
 import styles from '../setup.module.css';
 
-// Step 1 form: avatar, banner, bio, real name.
-// UI only — nothing is uploaded or saved yet.
+// Step 1 form: avatar, banner, bio, real name
+// UI only — nothing is uploaded or saved yet
 export default function BioAccountStep({ nextHref }) {
   return (
     <form className={styles.form}>

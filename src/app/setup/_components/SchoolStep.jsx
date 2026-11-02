@@ -7,7 +7,7 @@ const campuses = ['Sacramento State', 'UC Davis', 'UC Berkeley', 'UCLA', 'UC Irv
 const gradYears = [2026, 2027, 2028, 2029, 2030];
 
 // Step 2 form: campus, graduation year, school email verification.
-// UI only — nothing is saved and no verification email is sent.
+//ui only, need to implement logic later
 export default function SchoolStep({ nextHref }) {
   return (
     <form className={styles.form}>

@@ -12,10 +12,10 @@ const badges = {
 //   number:step number shown in the left corner of the tab you are on
 //   title: tab heading
 //   description: the description of the tab you are on
-//   status:
-//   editHref    - where the Edit link goes, e.g. '/setup?step=2'
-//   preview     - optional extra content for finished cards (step 1's avatar + banner)
-//   children    - the step's form, only shown when this is the current step
+//   status: the status of the tabs (complete, current, next)
+//   editHref: the edit link that takes you back to the previous step
+//   preview: preview info
+//   children: the step's form
 export default function StepCard({ number, title, description, status, editHref, preview, children })
  {
   const badge = badges[status];
