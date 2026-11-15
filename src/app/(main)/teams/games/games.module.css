@@ -1,0 +1,66 @@
+.gamesGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+.gameHeader {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding-bottom: 14px;
+  margin-bottom: 6px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.gameIcon {
+  width: 46px;
+  height: 46px;
+  flex: none;
+  border-radius: 12px;
+  background-color: #7053ff24;
+  color: #ab95ff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.gameName {
+  font-size: 16px;
+}
+
+.gameCount {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: 2px !important;
+}
+
+.gameTeamList {
+  display: flex;
+  flex-direction: column;
+}
+
+.gameTeamRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border-color);
+  font-size: 14px;
+}
+
+.gameTeamRow:last-child {
+  border-bottom: none;
+}
+
+.gameTeamName {
+  flex: 1;
+}
+
+@media (max-width: 1000px) {
+  .gamesGrid {
+    grid-template-columns: 1fr;
+  }
+}

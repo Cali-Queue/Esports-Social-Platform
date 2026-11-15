@@ -1,0 +1,92 @@
+.wikiLayout {
+  display: grid;
+  grid-template-columns: 220px 1fr 280px;
+  gap: 16px;
+  padding: 24px;
+  align-items: start;
+}
+
+.wikiToc {
+  position: sticky;
+  top: 24px;
+}
+
+.tocTitle {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 10px !important;
+}
+
+.wikiToc li a {
+  display: block;
+  padding: 7px 0;
+  font-size: 13px;
+  color: #c3c9d8;
+  text-decoration: none;
+}
+
+.wikiToc li a:hover {
+  color: var(--accent-teal);
+}
+
+.wikiArticle {
+  padding: 28px;
+}
+
+.wikiTitle {
+  font-size: 26px;
+  font-weight: 800;
+  margin-top: 14px !important;
+}
+
+.wikiMeta {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: 6px !important;
+  padding-bottom: 18px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.wikiSection {
+  padding-top: 22px;
+  scroll-margin-top: 24px;
+}
+
+.wikiSection h3 {
+  font-size: 17px;
+  margin-bottom: 8px;
+}
+
+.wikiSection p {
+  font-size: 14px;
+  line-height: 1.65;
+  color: #b4bbcb;
+}
+
+@media (max-width: 1100px) {
+  .wikiLayout {
+    grid-template-columns: 200px 1fr;
+  }
+  .wikiLayout > aside:last-child {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 720px) {
+  .wikiLayout {
+    grid-template-columns: 1fr;
+  }
+  .wikiToc {
+    position: static;
+  }
+}
+
+@media (max-width: 640px) {
+  .wikiLayout {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+}
