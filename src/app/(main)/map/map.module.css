@@ -1,0 +1,384 @@
+.page {
+  --bg-dark: #0a0c10;
+  --panel-bg: #11151f;
+  --border-color: #1e2433;
+  --accent-purple: #7053ff;
+  --accent-teal: #00e5a3;
+  --hero-avatar: #17694f;
+  --text-main: #f0f4fc;
+  --text-muted: #808a9d;
+
+  min-height: 100vh;
+  background-color: var(--bg-dark);
+  color: var(--text-main);
+}
+
+.page h1,
+.page h2,
+.page p,
+.page ul {
+  margin: 0;
+}
+
+/* ---------- Layout: left / map / right ---------- */
+.layout {
+  display: grid;
+  grid-template-columns: 280px 1fr 320px;
+  gap: 16px;
+  padding: 24px;
+  align-items: start;
+}
+
+.panel {
+  background-color: var(--panel-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  padding: 20px;
+}
+
+/* ---------- Left panel ---------- */
+.title {
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.3px;
+  margin-bottom: 18px !important;
+}
+
+.label {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin: 16px 0 8px !important;
+}
+
+.searchBox {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background-color: #0d1017;
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  padding: 0 12px;
+  color: var(--text-muted);
+}
+
+.searchBox:focus-within {
+  border-color: var(--accent-purple);
+}
+
+.searchBox input {
+  flex: 1;
+  min-width: 0;
+  padding: 12px 0;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--text-main);
+  font-size: 14px;
+}
+
+.chipGroup {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.chip {
+  background-color: #1a202c;
+  color: var(--text-muted);
+  border: none;
+  padding: 6px 12px;
+  border-radius: 16px;
+  font-size: 12px;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background-color 0.15s, color 0.15s;
+}
+
+span.chip {
+  cursor: default;
+}
+
+button.chip:hover {
+  color: var(--text-main);
+}
+
+.chipActive {
+  background-color: var(--accent-purple);
+  color: white;
+}
+
+.chipTeal {
+  background-color: var(--accent-teal);
+  color: #04221a;
+  font-weight: 600;
+}
+
+.infoCard {
+  display: flex;
+  gap: 10px;
+  margin-top: 22px;
+  padding: 12px;
+  border-radius: 8px;
+  border-left: 3px solid #a88aff;
+  background-color: var(--accent-purple);
+  color: #ece8ff;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.infoCard svg {
+  flex: none;
+  margin-top: 1px;
+}
+
+/* ---------- Map ---------- */
+.mapPanel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 640px;
+  padding: 24px;
+}
+
+.mapSvg {
+  width: 100%;
+  max-width: 480px;
+  max-height: 600px;
+}
+
+.state {
+  fill: #252c3d;
+  stroke: #56607a;
+  stroke-width: 1.5;
+  stroke-linejoin: round;
+}
+
+.marker {
+  cursor: pointer;
+  outline: none;
+  transition: opacity 0.2s;
+}
+
+.marker circle {
+  transform-box: fill-box;
+  transform-origin: center;
+  transition: transform 0.15s;
+}
+
+.marker:hover circle,
+.marker:focus-visible circle {
+  transform: scale(1.25);
+}
+
+.marker:focus-visible .labelBox {
+  stroke: var(--accent-teal);
+}
+
+.dot {
+  fill: var(--accent-purple);
+  stroke: #ffffff;
+  stroke-width: 1.5;
+}
+
+.dotSelected {
+  fill: var(--accent-teal);
+  stroke: #ffffff;
+  stroke-width: 2;
+}
+
+.labelBox {
+  fill: #0b0e15;
+  stroke: var(--border-color);
+}
+
+.labelText {
+  fill: var(--text-main);
+  font-size: 9.5px;
+  font-family: inherit;
+}
+
+.dimmed {
+  opacity: 0.2;
+  cursor: default;
+  pointer-events: none;
+}
+
+/* ---------- Right panel: school details ---------- */
+.detail {
+  animation: slideIn 0.25s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.detailTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.schoolAvatar {
+  width: 54px;
+  height: 54px;
+  border-radius: 10px;
+  background-color: var(--hero-avatar);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 15px;
+}
+
+.closeButton {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 14px;
+  cursor: pointer;
+  padding: 4px;
+}
+
+.closeButton:hover {
+  color: var(--text-main);
+}
+
+.schoolName {
+  font-size: 21px;
+  font-weight: 800;
+  margin-top: 16px !important;
+}
+
+.schoolMeta {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 8px !important;
+}
+
+.badgeRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.badge {
+  padding: 5px 12px;
+  border-radius: 14px;
+  font-size: 12px;
+}
+
+.badgePurple {
+  background-color: var(--accent-purple);
+}
+
+.badgeDark {
+  background-color: #2d3748;
+}
+
+.badgeTeal {
+  background-color: var(--accent-teal);
+  color: #04221a;
+  font-weight: 600;
+}
+
+.description {
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--text-muted);
+  margin-top: 16px !important;
+}
+
+.teamList {
+  list-style: none;
+  padding: 0;
+  margin-top: 14px !important;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.primaryButton {
+  display: inline-block;
+  margin-top: 20px;
+  background-color: var(--accent-purple);
+  color: white;
+  padding: 12px 32px;
+  border-radius: 10px;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.primaryButton:hover {
+  filter: brightness(1.12);
+}
+
+.disabled {
+  background-color: #2d3748;
+  color: var(--text-muted);
+  cursor: not-allowed;
+}
+
+.disabled:hover {
+  filter: none;
+}
+
+/* ---------- Right panel: nothing selected ---------- */
+.empty {
+  text-align: center;
+  padding: 36px 8px;
+}
+
+.emptyIcon {
+  width: 46px;
+  height: 46px;
+  margin: 0 auto 14px;
+  border-radius: 12px;
+  background-color: #7053ff24;
+  color: #ab95ff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.emptyTitle {
+  font-weight: 700;
+  font-size: 15px;
+}
+
+.emptyText {
+  font-size: 12.5px;
+  color: var(--text-muted);
+  margin-top: 6px !important;
+  line-height: 1.5;
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 1100px) {
+  .layout {
+    grid-template-columns: 260px 1fr;
+  }
+  .layout > aside:last-child {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 720px) {
+  .layout {
+    grid-template-columns: 1fr;
+    padding: 16px;
+  }
+  .mapPanel {
+    min-height: 0;
+  }
+}
