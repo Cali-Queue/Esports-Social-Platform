@@ -19,4 +19,5 @@ from django.urls import path, include
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path("api/discover/", include("accounts.urls")) #adds all of the paths for paths needed for discover and takes the url patterns from accounts/urls.py
 ]
