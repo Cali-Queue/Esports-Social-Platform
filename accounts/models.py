@@ -26,7 +26,7 @@ class User(AbstractBaseUser):
 
 #User Profile table, stores additional information about the user.
 class UserProfile(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile') #links each profile to one user and deletes the profile if the user is deleted
     handle = models.CharField(max_length=30, unique=True)
     gamertag = models.CharField(max_length=50)
     show_real_name = models.BooleanField(default=True)
