@@ -49,6 +49,8 @@
 .button{display:inline-flex;width:100%;min-height:46px;align-items:center;justify-content:center;gap:8px;border-radius:12px;border:0;padding:10px 16px;color:#fff;text-decoration:none;font-size:14px;font-weight:600;cursor:pointer;transition:filter .15s,transform .15s,background .15s}
 .button:hover{filter:brightness(1.12);transform:translateY(-1px)}
 .button:active{transform:none}
+/* while a form is submitting */
+.button:disabled{opacity:.6;cursor:wait;filter:none;transform:none}
 .purple{background:#7957fa}
 .redButton{background:#ff587b}
 .ghost{background:transparent;border:1px solid #30374c;color:#d6d8e3}

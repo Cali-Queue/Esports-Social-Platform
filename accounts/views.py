@@ -33,7 +33,7 @@ def discover_players(request):
             "id": profile.id,
             "handle": profile.handle,
             "gamertag": profile.gamertag,
-            "school": profile.user.school.school,
+            "school": profile.user.school.school if profile.user.school else None, #school is empty until the user finishes setup
             "game": profile.game,
             "role": profile.role,
             "looking_for_team": profile.looking_for_team,

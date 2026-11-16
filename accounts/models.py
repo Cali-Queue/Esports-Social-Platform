@@ -6,7 +6,7 @@ from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import F, Q
 from django.db.models.functions import Greatest, Least
-from django.contrib.auth.models import AbstractBaseUser
+from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 from django.utils import timezone
 
 
@@ -14,15 +14,32 @@ from django.utils import timezone
 class Schools(models.Model):
     school = models.CharField(max_length=100, unique=True)
 
+#Hashes the password and normalizes the email when creating users.
+#Use User.objects.create_user(...) instead of User.objects.create(...) so the password isn't saved as plain text.
+class UserManager(BaseUserManager):
+    def create_user(self, email, password, **extra_fields):
+        if not email:
+            raise ValueError('Users must have an email address.')
+        user = self.model(email=self.normalize_email(email).lower(), **extra_fields)
+        user.set_password(password)
+        user.save(using=self._db)
+        return user
+
 class User(AbstractBaseUser):
     email = models.EmailField(max_length=100, unique=True)
     real_name = models.CharField(max_length=200)
+    #collected at signup. nullable so accounts made before this column existed still work
+    age = models.PositiveSmallIntegerField(null=True, blank=True)
     isEmailVerified = models.BooleanField(default=False)
     dateJoined = models.DateField(default=timezone.now)
     is_active = models.BooleanField(default=True)
     role = models.CharField(max_length=50, default='Member')
-    school = models.ForeignKey(Schools, on_delete=models.PROTECT)
+    #empty at signup, the user picks their school in the first-time setup flow
+    school = models.ForeignKey(Schools, on_delete=models.PROTECT, null=True, blank=True)
     USERNAME_FIELD = "email"
+
+    #hooks up create_user() above
+    objects = UserManager()
 
 #User Profile table, stores additional information about the user.
 class UserProfile(models.Model):
