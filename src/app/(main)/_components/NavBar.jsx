@@ -4,7 +4,8 @@ import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { Bell, ChevronDown, Compass, House, LogOut, Map as MapIcon, MessageCircle, Search, UserRound } from 'lucide-react';
-import { CURRENT_USER_HANDLE, getPlayer } from '../_data/mockPlayers';
+import { useUser } from '../../../components/AuthProvider';
+import { userProfile } from '../../../lib/auth-client.mjs';
 import { useFriendRequests } from './FriendRequestsProvider';
 import styles from '../main.module.css';
 
@@ -20,7 +21,7 @@ const LINKS = [
 export default function NavBar() {
   const pathname = usePathname();
   const router = useRouter();
-  const me = getPlayer(CURRENT_USER_HANDLE);
+  const me = userProfile(useUser());
   const { incoming } = useFriendRequests();
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef(null);

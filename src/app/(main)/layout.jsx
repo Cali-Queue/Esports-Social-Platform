@@ -1,3 +1,5 @@
+import { requireUser } from '../../lib/auth';
+import { AuthProvider } from '../../components/AuthProvider';
 import { Inter, Space_Grotesk } from 'next/font/google';
 import NavBar from './_components/NavBar';
 import { FollowProvider } from './_components/FollowProvider';
@@ -9,8 +11,10 @@ const spaceGrotesk = Space_Grotesk({ subsets: ['latin'], variable: '--font-displ
 
 // Shared wrapper for the logged-in app (profile, feed, discover, etc).
 // (main) is a route group so it doesn't show up in the URL.
-export default function MainLayout({ children }) {
+export default async function MainLayout({ children }) {
+  const user = await requireUser();
   return (
+    <AuthProvider user={user}>
     <div className={`${styles.app} ${inter.variable} ${spaceGrotesk.variable}`}>
       <FriendRequestsProvider>
         <NavBar />
@@ -19,5 +23,6 @@ export default function MainLayout({ children }) {
         </FollowProvider>
       </FriendRequestsProvider>
     </div>
+    </AuthProvider>
   );
 }

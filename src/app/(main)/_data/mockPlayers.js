@@ -1,9 +1,6 @@
 // Fake data so the profile pages have something to show.
 // TODO(backend): replace with calls to the players/profile API.
 
-// whoever is "logged in" for now
-export const CURRENT_USER_HANDLE = 'kairoarc';
-
 export const players = {
   kairoarc: {
     handle: 'kairoarc',

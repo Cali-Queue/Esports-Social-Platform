@@ -1,3 +1,4 @@
+import ResendVerification from '../_components/ResendVerification';
 import Link from 'next/link';
 import { CircleX } from 'lucide-react';
 import StatusCard from '../_components/StatusCard';
@@ -15,14 +16,13 @@ export default function LinkExpiredPage() {
       title="Link expired"
       actions={
         <>
-          {/* TODO(backend): send a new verification email */}
-          <button type="button" className={`${styles.button} ${styles.redButton}`}>Send a new link</button>
-          <Link href="/signup" className={`${styles.button} ${styles.ghost}`}>Back to sign up</Link>
+          <ResendVerification />
+          <Link href="/login" className={`${styles.button} ${styles.ghost}`}>Log in</Link>
         </>
       }
     >
       <p className={styles.lead}>
-        This verification link is no longer active. Links expire 20 minutes after they&apos;re sent.
+        This verification link is no longer active. Links expire 24 hours after they&apos;re sent.
       </p>
     </StatusCard>
   );

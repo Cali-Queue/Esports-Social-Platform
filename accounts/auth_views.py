@@ -3,7 +3,12 @@
 #value back in the X-CSRFToken header on every POST.
 
 import json
-import re
+import logging
+import time
+
+from django.conf import settings
+
+from .email_verification import send_verification, verify
 
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.password_validation import validate_password
@@ -16,9 +21,9 @@ from django.views.decorators.http import require_GET, require_POST
 
 from . import login_protection
 from .models import User, UserProfile
+from .validators import validate_college_email
 
 #keep these in sync with src/app/(auth)/signup/page.jsx
-EMAIL_PATTERN = re.compile(r'^[^\s@]+@[^\s@]+\.edu$', re.IGNORECASE)
 MIN_AGE = 13
 MAX_AGE = 120
 #gamertag doubles as the profile handle, so it has to fit UserProfile.handle (30 chars)
@@ -101,13 +106,14 @@ def signup(request):
             elif age > MAX_AGE:
                 errors['age'] = 'Enter a valid age.'
 
-    # email: must be .edu and not already used (case-insensitive)
-    if not email:
-        errors['email'] = 'Enter your college email.'
-    elif not EMAIL_PATTERN.match(email) or len(email) > 100:
-        errors['email'] = 'Use a college email ending in .edu.'
-    elif User.objects.filter(email__iexact=email).exists():
-        errors['email'] = 'An account with this email already exists.'
+    # Validate the raw value too, so non-string inputs cannot be coerced.
+    try:
+        validate_college_email(data.get('email', ''))
+    except ValidationError as exc:
+        errors['email'] = ' '.join(exc.messages)
+    else:
+        if User.objects.filter(email__iexact=email).exists():
+            errors['email'] = 'An account with this email already exists.'
 
     # gamertag: required and unique, since it becomes the profile handle
     if not gamertag:
@@ -134,10 +140,10 @@ def signup(request):
         user = User.objects.create_user(email=email, password=password, real_name=name, age=age)
         UserProfile.objects.create(user=user, gamertag=gamertag, handle=gamertag.lower())
 
-    # TODO: send the verification email here (check-inbox page expects one)
-    # starts the session so the user is logged in right after signing up
+    # Keep a restricted session so delivery failures can be retried.
+    email_sent = _deliver(user)
     login(request, user)
-    return JsonResponse({'user': _user_json(user)}, status=201)
+    return JsonResponse({'user': _user_json(user), 'emailSent': email_sent}, status=201)
 
 
 #429 response while an email is locked out. lockedUntil lets the frontend show the time and count down
@@ -198,3 +204,87 @@ def me(request):
     if not request.user.is_authenticated:
         return JsonResponse({'detail': 'Not logged in.'}, status=401)
     return JsonResponse({'user': _user_json(request.user)})
+
+
+def _deliver(user):
+    try:
+        send_verification(user)
+        return True
+    except Exception:
+        # Do not log tokens, message bodies, addresses, or backend credentials.
+        logging.getLogger(__name__).error('Verification email delivery failed.')
+        return False
+
+
+@require_POST
+def resend_verification(request):
+    # No email lookup: only the session owner can request mail for their account.
+    if not request.user.is_authenticated:
+        return JsonResponse({'detail': 'Not logged in.'}, status=401)
+    if not _deliver(request.user):
+        return JsonResponse({'detail': 'Unable to send email. Please try again.'}, status=503)
+    return JsonResponse({'detail': 'If verification is needed, a link will be sent. Please allow 60 seconds between requests.'})
+
+
+@require_POST
+def verify_email(request):
+    data = _read_json(request)
+    if data is None or not verify(data.get('token')):
+        return JsonResponse({'detail': 'This verification link is invalid or expired.'}, status=400)
+    return JsonResponse({'detail': 'Email verified.'})
+
+
+@require_POST
+def request_password_reset(request):
+    from .password_reset import send_reset
+    data = _read_json(request)
+    if data is None:
+        return JsonResponse({'detail': 'Request body must be a JSON object.'}, status=400)
+    from .reset_throttle import allow_reset
+    started = time.monotonic()
+    email = _text(data, 'email').lower()
+    if allow_reset(request, email):
+        user = User.objects.filter(email__iexact=email, is_active=True).first()
+        if user and user.has_usable_password():
+            try:
+                send_reset(user)
+            except Exception:
+                logging.getLogger(__name__).error('Password reset email delivery failed.')
+    # Equalize ordinary delivery/lookup latency for known, unknown and limited requests.
+    time.sleep(max(0, settings.PASSWORD_RESET_RESPONSE_SECONDS - (time.monotonic() - started)))
+    # Do not expose account existence or email delivery status.
+    return JsonResponse({'detail': 'If an account exists, a password reset link will be sent to that address.'})
+
+
+@require_POST
+def reset_password(request):
+    from .password_reset import reset_user
+    data = _read_json(request)
+    invalid = {'detail': 'This password reset link is invalid or expired. Request a new link.'}
+    if data is None:
+        return JsonResponse(invalid, status=400)
+    with transaction.atomic():
+        user = reset_user(data.get('uid'), data.get('token'))
+        if user is None:
+            return JsonResponse(invalid, status=400)
+        password = data.get('password')
+        errors = {}
+        if not isinstance(password, str) or not password:
+            errors['password'] = 'Enter a new password.'
+        else:
+            try:
+                validate_password(password, user=user)
+            except ValidationError as exc:
+                errors['password'] = ' '.join(exc.messages)
+        if password != data.get('confirmPassword'):
+            errors['confirmPassword'] = 'Passwords do not match.'
+        if errors:
+            return JsonResponse({'errors': errors}, status=400)
+        previous = user.password
+        user.set_password(password)
+        # Only one concurrent request can replace the hash that validated the token.
+        if not User.objects.filter(pk=user.pk, password=previous, email=user.email,
+                                   is_active=True).update(password=user.password):
+            return JsonResponse(invalid, status=400)
+        # Existing sessions fail Django's auth hash check on their next request.
+    return JsonResponse({'detail': 'Password reset. Log in with your new password.'})

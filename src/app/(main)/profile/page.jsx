@@ -1,16 +1,17 @@
+import { requireUser } from '../../../lib/auth';
+import { userProfile } from '../../../lib/auth-client.mjs';
 import Link from 'next/link';
 import { Pencil } from 'lucide-react';
 import ProfileView from '../_components/ProfileView';
-import { CURRENT_USER_HANDLE, getPlayer, players } from '../_data/mockPlayers';
+import { players } from '../_data/mockPlayers';
 import styles from '../main.module.css';
 
 export const metadata = { title: 'My profile · Cali Queue' };
 
 // The logged-in user's own profile. Same layout as /players/[handle],
 // but with Edit instead of Follow / Add friend / Message.
-export default function MyProfilePage() {
-  // TODO(backend): get the logged-in user from the session instead of mock data
-  const me = getPlayer(CURRENT_USER_HANDLE);
+export default async function MyProfilePage() {
+  const me = userProfile(await requireUser());
   // TODO(backend): real suggestions endpoint
   const suggested = Object.values(players).filter((p) => p.handle !== me.handle);
 

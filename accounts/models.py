@@ -151,6 +151,14 @@ class FriendRequest(models.Model):
         self.responded_at = timezone.now()
         self.save(update_fields=['status', 'responded_at'])
 
+
+class EmailVerification(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    token_hash = models.CharField(max_length=64, unique=True)
+    email = models.EmailField(max_length=100)
+    sent_at = models.DateTimeField()
+
+
 #Failed Login Attempt table, one row per wrong email/password on the login form.
 #Keyed by the email that was typed instead of a User FK, so made-up emails get tracked and locked
 #the same way as real ones. Otherwise the lockout itself would reveal which accounts exist.

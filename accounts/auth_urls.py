@@ -5,6 +5,10 @@ from django.urls import path
 from . import auth_views as views
 
 urlpatterns = [
+    path('forgot-password/', views.request_password_reset, name='auth_forgot_password'),
+    path('reset-password/', views.reset_password, name='auth_reset_password'),
+    path('verify-email/', views.verify_email, name='auth_verify_email'),
+    path('resend-verification/', views.resend_verification, name='auth_resend_verification'),
     path('csrf/', views.csrf, name='auth_csrf'),        # GET  sets the CSRF cookie
     path('signup/', views.signup, name='auth_signup'),  # POST create account + log in
     path('login/', views.login_view, name='auth_login'),  # POST log in

@@ -1,5 +1,6 @@
 'use client';
 
+import { authPost } from '../../../lib/auth-client.mjs';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -43,21 +44,13 @@ export default function LoginPage() {
 
     setSubmitting(true);
     try {
-      // Django rejects POSTs without a CSRF token. this sets the csrftoken cookie, then we read it
-      await fetch('/api/auth/csrf');
-      const csrfToken = document.cookie.split('; ').find((c) => c.startsWith('csrftoken='))?.split('=')[1] ?? '';
-
-      // goes through the /api proxy in next.config.mjs to Django's login view
-      const res = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken },
-        body: JSON.stringify({ email: email.trim(), password }),
-      });
+      const res = await authPost('login', { email: email.trim(), password });
       // some error responses aren't JSON (e.g. Django's HTML 403 page), so fall back to {}
       const data = await res.json().catch(() => ({}));
 
       if (res.ok) {
-        router.push('/home');
+        router.replace(data.user.isEmailVerified ? '/home' : '/check-inbox');
+        router.refresh();
         return;
       }
 

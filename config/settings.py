@@ -127,3 +127,23 @@ AUTH_USER_MODEL = "accounts.User"
 
 # Next.js dev server. Lets its requests (proxied to /api/...) pass Django's CSRF origin check.
 CSRF_TRUSTED_ORIGINS = ['http://localhost:3000', 'http://127.0.0.1:3000']
+# Safe local default: mail stays in the server console.
+import os
+EMAIL_BACKEND = os.environ.get('EMAIL_BACKEND', 'django.core.mail.backends.console.EmailBackend')
+DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'Cali Queue <noreply@localhost>')
+EMAIL_VERIFICATION_ORIGIN = os.environ.get('EMAIL_VERIFICATION_ORIGIN', 'http://localhost:3000')
+EMAIL_HOST = os.environ.get('EMAIL_HOST', '')
+EMAIL_PORT = int(os.environ.get('EMAIL_PORT', '587'))
+EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', '')
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')
+EMAIL_USE_TLS = os.environ.get('EMAIL_USE_TLS', 'true').lower() == 'true'
+EMAIL_TIMEOUT = 10
+MIDDLEWARE.insert(MIDDLEWARE.index('django.contrib.auth.middleware.AuthenticationMiddleware') + 1,
+                  'accounts.middleware.VerifiedAccountMiddleware')
+
+# Trusted frontend origin, never derived from the incoming request.
+PASSWORD_RESET_ORIGIN = os.environ.get('PASSWORD_RESET_ORIGIN', EMAIL_VERIFICATION_ORIGIN)
+PASSWORD_RESET_TIMEOUT = 3600
+
+# Minimum reset response time; slow SMTP can still exceed this floor.
+PASSWORD_RESET_RESPONSE_SECONDS = 0.3

@@ -1,16 +1,18 @@
 'use client';
 
 import { useState } from 'react';
+import { authPost } from '../../../lib/auth-client.mjs';
 import Link from 'next/link';
 import TextField from '../_components/TextField';
 import styles from '../auth.module.css';
 
 export default function ForgotPasswordPage() {
+  const [busy, setBusy] = useState(false);
   const [email, setEmail] = useState('');
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState('');
 
-    function handleSubmit(event) {
+    async function handleSubmit(event) {
       event.preventDefault();
 
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
@@ -20,7 +22,14 @@ export default function ForgotPasswordPage() {
       }
 
       setError('');
-      setSubmitted(true);
+      setBusy(true);
+      try {
+        const response = await authPost('forgot-password', { email: email.trim() });
+        if (!response.ok) throw new Error();
+        setSubmitted(true);
+      } catch {
+        setError('Unable to request a reset link. Please try again.');
+      } finally { setBusy(false); }
     }
 
   return (
@@ -45,7 +54,7 @@ export default function ForgotPasswordPage() {
         />
 
         <div className={styles.actions}>
-          <button className={`${styles.button} ${styles.purple}`} type="submit">Send reset link</button>
+          <button className={`${styles.button} ${styles.purple}`} type="submit" disabled={busy}>{busy ? 'Sending…' : 'Send reset link'}</button>
         </div>
       </form>
 

@@ -7,10 +7,10 @@ import styles from '../setup.module.css';
 
 // Step 1 form: avatar, banner, bio, real name
 // bio + real name are saved. avatar/banner upload is a separate subtask
-export default function BioAccountStep({ nextHref }) {
+export default function BioAccountStep({ nextHref, user }) {
   const { profile, errors, formError, saving, submit } = useSetupStep(nextHref);
   const [bio, setBio] = useState('');
-  const [realName, setRealName] = useState('');
+  const [realName, setRealName] = useState(user.realName);
 
   // fill in what's already saved once the profile loads
   useEffect(() => {
@@ -29,7 +29,7 @@ export default function BioAccountStep({ nextHref }) {
       <div className={styles.media}>
         {/* TODO(avatar subtask): upload + show the real avatar instead of initials */}
         <label className={styles.avatarUpload} title="Upload avatar">
-          KA
+          {user.initials}
           <input type="file" accept="image/*" className={styles.fileInput} aria-label="Upload avatar" />
         </label>
         <label className={styles.bannerUpload}>
@@ -58,7 +58,6 @@ export default function BioAccountStep({ nextHref }) {
         <input
           id="setup-real-name"
           className={styles.input}
-          placeholder="Kaden A."
           maxLength={200}
           value={realName}
           onChange={(event) => setRealName(event.target.value)}

@@ -1,7 +1,7 @@
 'use client';
 
 import { createContext, useContext, useEffect, useState } from 'react';
-import { CURRENT_USER_HANDLE } from '../_data/mockPlayers';
+import { useUser } from '../../../components/AuthProvider';
 import { initialFriendRequests, pendingBetween, relationship } from '../_data/friendRequests';
 
 // Shares friend requests between the profile buttons, the nav badge and /notifications.
@@ -15,26 +15,28 @@ const FriendRequestsContext = createContext(null);
 export function FriendRequestsProvider({ children }) {
   const [requests, setRequests] = useState(initialFriendRequests);
   const [ready, setReady] = useState(false);
-  const me = CURRENT_USER_HANDLE;
+  const user = useUser();
+  const me = user.handle || `user-${user.id}`;
+  const storageKey = `${STORAGE_KEY}-${user.id}`;
 
   useEffect(() => {
     try {
-      const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
+      const saved = JSON.parse(localStorage.getItem(storageKey));
       if (Array.isArray(saved)) setRequests(saved);
     } catch {
       // private mode or bad data, keep the defaults
     }
     setReady(true);
-  }, []);
+  }, [storageKey]);
 
   useEffect(() => {
     if (!ready) return;
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(requests));
+      localStorage.setItem(storageKey, JSON.stringify(requests));
     } catch {
       // storage blocked, requests just won't survive a refresh
     }
-  }, [requests, ready]);
+  }, [requests, ready, storageKey]);
 
   // same rules as FriendRequest.send() on the back end
   function sendRequest(to) {
