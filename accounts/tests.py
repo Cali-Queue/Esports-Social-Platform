@@ -176,9 +176,11 @@ class SessionAuthenticationTests(TestCase):
             self.assertEqual(response.status_code, 200)
             self.assertEqual(response.json()['user'], expected)
 
-    def test_logout_invalidates_session_and_old_cookie(self):
+    def test_unverified_logout_invalidates_session_and_old_cookie(self):
         from django.test import Client
+        self.assertFalse(self.user.isEmailVerified)
         self.login()
+        self.assertEqual(self.client.get('/api/discover/players/').status_code, 403)
         old_session = self.client.cookies['sessionid'].value
         self.assertEqual(self.post('auth_logout').status_code, 200)
         self.assertFalse(Session.objects.filter(session_key=old_session).exists())
@@ -339,6 +341,8 @@ class EmailVerificationTests(TestCase):
                    PASSWORD_HASHERS=['django.contrib.auth.hashers.MD5PasswordHasher'])
 class PasswordResetTests(TestCase):
     def setUp(self):
+        from django.core.cache import cache
+        cache.clear()
         self.user = User.objects.create_user(email='reset@csus.edu', password='Old!p8Vx2#kL', real_name='Player')
 
     def request_link(self, email='reset@csus.edu'):
@@ -363,6 +367,8 @@ class PasswordResetTests(TestCase):
         self.assertEqual(len(mail.outbox), 1)
         self.assertEqual(mail.outbox[0].to, [self.user.email])
         for outcome in (RuntimeError(), 0):
+            from django.core.cache import cache
+            cache.clear()
             kwargs = {'side_effect': outcome} if isinstance(outcome, Exception) else {'return_value': outcome}
             with patch('accounts.password_reset.send_mail', **kwargs):
                 self.assertEqual(self.request_link().content, known.content)
@@ -427,6 +433,8 @@ class PasswordResetTests(TestCase):
         self.assertEqual(self.reset().status_code, 200)
         self.user.refresh_from_db()
         self.assertTrue(self.user.isEmailVerified)
+        from django.core.cache import cache
+        cache.clear()
         self.request_link()
         self.user.email = 'changed@csus.edu'
         self.user.save()
@@ -438,3 +446,43 @@ class PasswordResetTests(TestCase):
         for name in ('auth_forgot_password', 'auth_reset_password'):
             self.assertEqual(secure.get(reverse(name)).status_code, 405)
             self.assertEqual(secure.post(reverse(name), {}, content_type='application/json').status_code, 403)
+
+    def test_reset_limits_known_unknown_normalization_and_expiry(self):
+        from django.core import mail
+        from django.core.cache import cache
+        from unittest.mock import patch
+        first = self.request_link()
+        with patch('accounts.auth_views.User.objects.filter') as lookup:
+            self.assertEqual(self.request_link(' RESET@CSUS.EDU ').content, first.content)
+            lookup.assert_not_called()
+        self.assertEqual(len(mail.outbox), 1)
+        cache.clear()
+        self.assertEqual(self.request_link('missing@csus.edu').content, first.content)
+        with patch('accounts.auth_views.User.objects.filter') as lookup:
+            self.assertEqual(self.request_link(' MISSING@CSUS.EDU ').content, first.content)
+            lookup.assert_not_called()
+        cache.clear()  # Simulate cooldown expiry.
+        self.request_link()
+        self.assertEqual(len(mail.outbox), 2)
+
+    def test_reset_source_limit_covers_distinct_unknown_addresses(self):
+        from unittest.mock import patch
+        from .reset_throttle import IP_LIMIT
+        with patch('accounts.reset_throttle.time.time', return_value=120):
+            for index in range(IP_LIMIT):
+                self.request_link(f'unknown{index}@csus.edu')
+            with patch('accounts.auth_views.User.objects.filter') as lookup:
+                response = self.request_link()
+                lookup.assert_not_called()
+            self.assertEqual(response.status_code, 200)
+        with patch('accounts.reset_throttle.time.time', return_value=180):
+            self.request_link()
+        from django.core import mail
+        self.assertEqual(len(mail.outbox), 1)
+
+    def test_reset_timing_floor_applies_to_unknown_and_throttled_requests(self):
+        from unittest.mock import patch
+        for _ in range(2):
+            with patch('accounts.auth_views.time.monotonic', side_effect=[10, 10.1]), patch('accounts.auth_views.time.sleep') as sleep:
+                self.request_link('unknown@csus.edu')
+                self.assertAlmostEqual(sleep.call_args.args[0], 0.2)

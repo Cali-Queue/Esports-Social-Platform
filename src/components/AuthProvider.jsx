@@ -5,7 +5,7 @@ import { usePathname, useRouter } from 'next/navigation';
 
 const AuthContext = createContext(null);
 
-export function AuthProvider({ user, children }) {
+export function AuthProvider({ user, children, allowUnverified = false }) {
   const [currentUser, setCurrentUser] = useState(user);
   const [error, setError] = useState('');
   const pathname = usePathname();
@@ -23,7 +23,7 @@ export function AuthProvider({ user, children }) {
         } else if (response.ok) {
           const data = await response.json();
           if (active) {
-            if (!data.user.isEmailVerified) { router.replace('/check-inbox'); router.refresh(); return; }
+            if (!allowUnverified && !data.user.isEmailVerified) { router.replace('/check-inbox'); router.refresh(); return; }
             setCurrentUser(data.user); setError('');
           }
         } else setError('Unable to load your session. Please reload to try again.');
@@ -34,7 +34,7 @@ export function AuthProvider({ user, children }) {
     refresh();
     window.addEventListener('focus', refresh);
     return () => { active = false; window.removeEventListener('focus', refresh); };
-  }, [pathname, router]);
+  }, [pathname, router, allowUnverified]);
   if (error) return <p role="alert">{error}</p>;
   if (!currentUser) return <p role="status">Redirecting to login…</p>;
   return <AuthContext.Provider value={currentUser}>{children}</AuthContext.Provider>;

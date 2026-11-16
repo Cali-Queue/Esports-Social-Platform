@@ -4,6 +4,9 @@
 
 import json
 import logging
+import time
+
+from django.conf import settings
 
 from .email_verification import send_verification, verify
 
@@ -213,12 +216,18 @@ def request_password_reset(request):
     data = _read_json(request)
     if data is None:
         return JsonResponse({'detail': 'Request body must be a JSON object.'}, status=400)
-    user = User.objects.filter(email__iexact=_text(data, 'email'), is_active=True).first()
-    if user and user.has_usable_password():
-        try:
-            send_reset(user)
-        except Exception:
-            logging.getLogger(__name__).error('Password reset email delivery failed.')
+    from .reset_throttle import allow_reset
+    started = time.monotonic()
+    email = _text(data, 'email').lower()
+    if allow_reset(request, email):
+        user = User.objects.filter(email__iexact=email, is_active=True).first()
+        if user and user.has_usable_password():
+            try:
+                send_reset(user)
+            except Exception:
+                logging.getLogger(__name__).error('Password reset email delivery failed.')
+    # Equalize ordinary delivery/lookup latency for known, unknown and limited requests.
+    time.sleep(max(0, settings.PASSWORD_RESET_RESPONSE_SECONDS - (time.monotonic() - started)))
     # Do not expose account existence or email delivery status.
     return JsonResponse({'detail': 'If an account exists, a password reset link will be sent to that address.'})
 

@@ -144,3 +144,6 @@ MIDDLEWARE.insert(MIDDLEWARE.index('django.contrib.auth.middleware.Authenticatio
 # Trusted frontend origin, never derived from the incoming request.
 PASSWORD_RESET_ORIGIN = os.environ.get('PASSWORD_RESET_ORIGIN', EMAIL_VERIFICATION_ORIGIN)
 PASSWORD_RESET_TIMEOUT = 3600
+
+# Minimum reset response time; slow SMTP can still exceed this floor.
+PASSWORD_RESET_RESPONSE_SECONDS = 0.3

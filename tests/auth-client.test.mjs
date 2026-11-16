@@ -53,3 +53,41 @@ test('server session lookup forwards cookies, disables caching, and rejects unau
     await assert.rejects(currentUser('', 'http://django:8000'), /Unable to load/);
   } finally { global.fetch = originalFetch; }
 });
+
+test('logout page accepts restricted sessions while main guard still requires verification', async () => {
+  const { readFile } = await import('node:fs/promises');
+  const page = await readFile(new URL('../src/app/(auth)/logout/page.jsx', import.meta.url), 'utf8');
+  const guards = await readFile(new URL('../src/lib/auth.js', import.meta.url), 'utf8');
+  assert.match(page, /await requireSession\(\)/);
+  const session = guards.split('export async function requireUser')[0];
+  assert.match(session, /redirect\('\/login'\)/);
+  assert.doesNotMatch(session, /isEmailVerified/);
+  assert.match(guards, /if \(!user.isEmailVerified\) redirect\('\/check-inbox'\)/);
+});
+
+test('switching accounts keeps follow choices isolated and ignores unowned legacy state', async () => {
+  const { readFollows, saveFollows } = await import('../src/lib/follow-storage.mjs');
+  const values = new Map([['cq-following', '["legacy-player"]']]);
+  const storage = { getItem: (key) => values.get(key) ?? null, setItem: (key, value) => values.set(key, value) };
+  assert.deepEqual(readFollows(storage, 1, []), []);
+  saveFollows(storage, 1, ['player-a']);
+  assert.deepEqual(readFollows(storage, 2, []), []);
+  saveFollows(storage, 2, ['team-b']);
+  assert.deepEqual(readFollows(storage, 1, []), ['player-a']);
+  assert.deepEqual(readFollows(storage, 2, []), ['team-b']);
+  saveFollows(storage, 1, []);
+  assert.deepEqual(readFollows(storage, 1, ['default']), []);
+  values.set('cq-following:1', 'broken');
+  assert.deepEqual(readFollows(storage, 1, ['default']), ['default']);
+});
+
+test('logout explicitly permits unverified client refresh while other providers remain restricted', async () => {
+  const { readFile } = await import('node:fs/promises');
+  const page = await readFile(new URL('../src/app/(auth)/logout/page.jsx', import.meta.url), 'utf8');
+  const provider = await readFile(new URL('../src/components/AuthProvider.jsx', import.meta.url), 'utf8');
+  assert.match(page, /AuthProvider user=\{user\} allowUnverified/);
+  assert.match(provider, /allowUnverified = false/);
+  assert.match(provider, /!allowUnverified && !data.user.isEmailVerified/);
+  const follows = await readFile(new URL('../src/app/(main)/_components/FollowProvider.jsx', import.meta.url), 'utf8');
+  assert.match(follows, /UserFollows key=\{user.id\} userId=\{user.id\}/);
+});
