@@ -60,6 +60,11 @@
 .input::placeholder{color:#5c6276}
 .textarea{height:clamp(78px,10vh,96px);padding:10px 14px;resize:none;line-height:1.5;overflow-y:auto;scrollbar-width:thin;scrollbar-color:#30374c transparent}
 .hint{margin:0;font-size:12px;color:var(--faint)}
+/* save errors from the server, shown under a field or above the button */
+.error{margin:0;font-size:12px;color:#ff637e}
+/* step buttons are real <button>s now: use the page font, dim while loading/saving */
+button.button{font-family:inherit}
+.button:disabled{opacity:.6;cursor:wait;filter:none}
 .form .purple{justify-self:start}
 
 /* ---------- School form ---------- */

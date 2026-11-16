@@ -10,7 +10,7 @@ export const metadata = { title: 'Set up your profile · Cali Queue' };
 
 const steps = [
   { number: '01', title: 'Bio & account', description: 'Avatar, banner, bio, real name', Form: BioAccountStep },
-  { number: '02', title: 'School', description: 'Campus, graduation year, verification', Form: SchoolStep },
+  { number: '02', title: 'School', description: 'Campus and graduation year', Form: SchoolStep },
   { number: '03', title: 'Team & games', description: 'Current team and main game', Form: TeamGamesStep },
   { number: '04', title: 'Interests', description: 'Discovery topics and community goals', Form: InterestsStep },
 ];
