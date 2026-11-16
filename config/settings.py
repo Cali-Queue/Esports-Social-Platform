@@ -140,3 +140,7 @@ EMAIL_USE_TLS = os.environ.get('EMAIL_USE_TLS', 'true').lower() == 'true'
 EMAIL_TIMEOUT = 10
 MIDDLEWARE.insert(MIDDLEWARE.index('django.contrib.auth.middleware.AuthenticationMiddleware') + 1,
                   'accounts.middleware.VerifiedAccountMiddleware')
+
+# Trusted frontend origin, never derived from the incoming request.
+PASSWORD_RESET_ORIGIN = os.environ.get('PASSWORD_RESET_ORIGIN', EMAIL_VERIFICATION_ORIGIN)
+PASSWORD_RESET_TIMEOUT = 3600

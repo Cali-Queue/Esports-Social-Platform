@@ -205,3 +205,53 @@ def verify_email(request):
     if data is None or not verify(data.get('token')):
         return JsonResponse({'detail': 'This verification link is invalid or expired.'}, status=400)
     return JsonResponse({'detail': 'Email verified.'})
+
+
+@require_POST
+def request_password_reset(request):
+    from .password_reset import send_reset
+    data = _read_json(request)
+    if data is None:
+        return JsonResponse({'detail': 'Request body must be a JSON object.'}, status=400)
+    user = User.objects.filter(email__iexact=_text(data, 'email'), is_active=True).first()
+    if user and user.has_usable_password():
+        try:
+            send_reset(user)
+        except Exception:
+            logging.getLogger(__name__).error('Password reset email delivery failed.')
+    # Do not expose account existence or email delivery status.
+    return JsonResponse({'detail': 'If an account exists, a password reset link will be sent to that address.'})
+
+
+@require_POST
+def reset_password(request):
+    from .password_reset import reset_user
+    data = _read_json(request)
+    invalid = {'detail': 'This password reset link is invalid or expired. Request a new link.'}
+    if data is None:
+        return JsonResponse(invalid, status=400)
+    with transaction.atomic():
+        user = reset_user(data.get('uid'), data.get('token'))
+        if user is None:
+            return JsonResponse(invalid, status=400)
+        password = data.get('password')
+        errors = {}
+        if not isinstance(password, str) or not password:
+            errors['password'] = 'Enter a new password.'
+        else:
+            try:
+                validate_password(password, user=user)
+            except ValidationError as exc:
+                errors['password'] = ' '.join(exc.messages)
+        if password != data.get('confirmPassword'):
+            errors['confirmPassword'] = 'Passwords do not match.'
+        if errors:
+            return JsonResponse({'errors': errors}, status=400)
+        previous = user.password
+        user.set_password(password)
+        # Only one concurrent request can replace the hash that validated the token.
+        if not User.objects.filter(pk=user.pk, password=previous, email=user.email,
+                                   is_active=True).update(password=user.password):
+            return JsonResponse(invalid, status=400)
+        # Existing sessions fail Django's auth hash check on their next request.
+    return JsonResponse({'detail': 'Password reset. Log in with your new password.'})

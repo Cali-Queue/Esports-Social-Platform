@@ -333,3 +333,108 @@ class EmailVerificationTests(TestCase):
         self.user.is_active = False
         self.user.save()
         self.assertEqual(self.verify(token).status_code, 400)
+
+
+@override_settings(EMAIL_BACKEND='django.core.mail.backends.locmem.EmailBackend',
+                   PASSWORD_HASHERS=['django.contrib.auth.hashers.MD5PasswordHasher'])
+class PasswordResetTests(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(email='reset@csus.edu', password='Old!p8Vx2#kL', real_name='Player')
+
+    def request_link(self, email='reset@csus.edu'):
+        return self.client.post(reverse('auth_forgot_password'), {'email': email}, content_type='application/json')
+
+    def link(self):
+        from django.core import mail
+        from urllib.parse import parse_qs
+        return {key: values[0] for key, values in parse_qs(mail.outbox[-1].body.split('#')[1].split('\n')[0]).items()}
+
+    def reset(self, credentials=None, **changes):
+        data = {**(credentials or self.link()), 'password': 'New!q9Zr4#vK', 'confirmPassword': 'New!q9Zr4#vK', **changes}
+        return self.client.post(reverse('auth_reset_password'), data, content_type='application/json')
+
+    def test_generic_requests_and_delivery_failures(self):
+        from django.core import mail
+        from unittest.mock import patch
+        known = self.request_link(' RESET@CSUS.EDU ')
+        unknown = self.request_link('absent@csus.edu')
+        self.assertEqual(known.status_code, 200)
+        self.assertEqual(known.content, unknown.content)
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertEqual(mail.outbox[0].to, [self.user.email])
+        for outcome in (RuntimeError(), 0):
+            kwargs = {'side_effect': outcome} if isinstance(outcome, Exception) else {'return_value': outcome}
+            with patch('accounts.password_reset.send_mail', **kwargs):
+                self.assertEqual(self.request_link().content, known.content)
+        self.user.is_active = False
+        self.user.save()
+        self.assertEqual(self.request_link().content, known.content)
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertNotIn(self.link()['token'], known.content.decode())
+
+    def test_reset_single_use_sessions_login_and_verification_restrictions(self):
+        from django.test import Client
+        other = Client()
+        self.client.force_login(self.user)
+        other.force_login(self.user)
+        self.request_link()
+        credentials = self.link()
+        self.assertEqual(self.reset(credentials).status_code, 200)
+        self.assertEqual(self.reset(credentials).status_code, 400)
+        self.assertEqual(self.client.get(reverse('auth_me')).status_code, 401)
+        self.assertEqual(other.get(reverse('auth_me')).status_code, 401)
+        self.user.refresh_from_db()
+        self.assertFalse(self.user.isEmailVerified)
+        self.assertTrue(self.user.check_password('New!q9Zr4#vK'))
+        for password, status in [('Old!p8Vx2#kL', 401), ('New!q9Zr4#vK', 200)]:
+            response = self.client.post(reverse('auth_login'), {'email': self.user.email, 'password': password}, content_type='application/json')
+            self.assertEqual(response.status_code, status)
+        self.assertEqual(self.client.get('/api/discover/players/').status_code, 403)
+
+    def test_expiration_tampering_malformed_and_purpose(self):
+        from datetime import timedelta
+        from unittest.mock import patch
+        from .password_reset import tokens
+        from .email_verification import send_verification
+        from django.contrib.auth.tokens import default_token_generator
+        now = tokens._now()
+        with patch.object(tokens, '_now', return_value=now):
+            self.request_link()
+        credentials = self.link()
+        with patch.object(tokens, '_now', return_value=now + timedelta(seconds=3601)):
+            self.assertEqual(self.reset(credentials).status_code, 400)
+        for token in (credentials['token'] + 'x', None, {}, default_token_generator.make_token(self.user)):
+            self.assertEqual(self.reset(credentials, token=token).status_code, 400)
+        for uid in ('!!!', None, {}, 'x' * 101):
+            self.assertEqual(self.reset(credentials, uid=uid).status_code, 400)
+        send_verification(self.user)
+        self.assertEqual(self.reset(credentials, token=self.link()['token']).status_code, 400)
+        self.assertEqual(self.client.post(reverse('auth_verify_email'), {'token': credentials['token']}, content_type='application/json').status_code, 400)
+
+    def test_password_policy_and_confirmation_do_not_consume_token(self):
+        self.request_link()
+        for password in ('short', '123456789', 'password', 'reset@csus.edu'):
+            response = self.reset(password=password, confirmPassword=password)
+            self.assertEqual(response.status_code, 400)
+            self.assertIn('password', response.json()['errors'])
+        self.assertIn('confirmPassword', self.reset(confirmPassword='different').json()['errors'])
+        self.assertEqual(self.reset().status_code, 200)
+
+    def test_verified_status_preserved_and_changed_email_invalidates(self):
+        self.user.isEmailVerified = True
+        self.user.save()
+        self.request_link()
+        self.assertEqual(self.reset().status_code, 200)
+        self.user.refresh_from_db()
+        self.assertTrue(self.user.isEmailVerified)
+        self.request_link()
+        self.user.email = 'changed@csus.edu'
+        self.user.save()
+        self.assertEqual(self.reset().status_code, 400)
+
+    def test_csrf_and_methods(self):
+        from django.test import Client
+        secure = Client(enforce_csrf_checks=True)
+        for name in ('auth_forgot_password', 'auth_reset_password'):
+            self.assertEqual(secure.get(reverse(name)).status_code, 405)
+            self.assertEqual(secure.post(reverse(name), {}, content_type='application/json').status_code, 403)

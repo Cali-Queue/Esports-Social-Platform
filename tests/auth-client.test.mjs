@@ -6,7 +6,7 @@ test('login and logout use the proxy with cookies and a fresh CSRF token', async
   const originalFetch = global.fetch;
   const originalDocument = global.document;
   try {
-    for (const action of ['login', 'logout', 'signup', 'verify-email', 'resend-verification']) {
+    for (const action of ['login', 'logout', 'signup', 'verify-email', 'resend-verification', 'forgot-password', 'reset-password']) {
       const calls = [];
       global.document = { cookie: 'csrftoken=rotated-token; other=value' };
       global.fetch = async (...args) => { calls.push(args); return { ok: true }; };

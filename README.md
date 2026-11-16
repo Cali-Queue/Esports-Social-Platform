@@ -34,3 +34,24 @@ Delivery is synchronous with a 10-second SMTP timeout; production should apply
 edge rate limits to signup/login/verification in addition to resend's database
 cooldown. Resend never accepts a target email and exposes no account lookup;
 the pre-existing signup duplicate-email validation still reveals registrations.
+
+### Password reset (ESP-51)
+
+The forgot-password form sends a CSRF-protected request through the Next API
+proxy. Registered and unknown addresses receive the same success response,
+including on delivery failure. Reset links carry a purpose-specific Django token
+in the URL fragment (removed from browser history when the page opens). Links
+expire after one hour; resetting the password invalidates all outstanding reset
+links and existing Django sessions on their next request. Reset does not log in
+or verify the user, and unverified accounts retain their restrictions.
+
+The existing email backend and SMTP settings above also deliver reset mail.
+Set `PASSWORD_RESET_ORIGIN` to the trusted HTTPS frontend origin (defaults to
+`EMAIL_VERIFICATION_ORIGIN`). Production still needs SMTP credentials, a verified
+sender, SPF/DKIM/DMARC, delivery monitoring and real inbox testing. The console
+backend prints links locally and must not be used in production. Requests send
+synchronously, so response timing can reveal delivery work despite identical
+responses; production should queue mail and apply per-IP/per-address rate limits
+to prevent timing probes and email flooding. No reset-specific throttling or
+background worker is included in this change. SQLite does not support row locks;
+a conditional hash update ensures only one successful reset can consume a token.
