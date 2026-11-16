@@ -3,7 +3,6 @@
 #value back in the X-CSRFToken header on every POST.
 
 import json
-import re
 
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.password_validation import validate_password
@@ -14,9 +13,9 @@ from django.views.decorators.csrf import ensure_csrf_cookie
 from django.views.decorators.http import require_GET, require_POST
 
 from .models import User, UserProfile
+from .validators import validate_college_email
 
 #keep these in sync with src/app/(auth)/signup/page.jsx
-EMAIL_PATTERN = re.compile(r'^[^\s@]+@[^\s@]+\.edu$', re.IGNORECASE)
 MIN_AGE = 13
 MAX_AGE = 120
 #gamertag doubles as the profile handle, so it has to fit UserProfile.handle (30 chars)
@@ -99,13 +98,14 @@ def signup(request):
             elif age > MAX_AGE:
                 errors['age'] = 'Enter a valid age.'
 
-    # email: must be .edu and not already used (case-insensitive)
-    if not email:
-        errors['email'] = 'Enter your college email.'
-    elif not EMAIL_PATTERN.match(email) or len(email) > 100:
-        errors['email'] = 'Use a college email ending in .edu.'
-    elif User.objects.filter(email__iexact=email).exists():
-        errors['email'] = 'An account with this email already exists.'
+    # Validate the raw value too, so non-string inputs cannot be coerced.
+    try:
+        validate_college_email(data.get('email', ''))
+    except ValidationError as exc:
+        errors['email'] = ' '.join(exc.messages)
+    else:
+        if User.objects.filter(email__iexact=email).exists():
+            errors['email'] = 'An account with this email already exists.'
 
     # gamertag: required and unique, since it becomes the profile handle
     if not gamertag:

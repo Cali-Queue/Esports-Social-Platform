@@ -7,8 +7,7 @@ import TextField from '../_components/TextField';
 import PasswordField from '../_components/PasswordField';
 import styles from '../auth.module.css';
 
-// only checks for .edu for now. backend should check against the Schools
-// table so random non-CA schools can't sign up
+// Basic client check only; Django enforces the approved college domain list.
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.edu$/i;
 
 // 13 is the COPPA floor. adjust if the club wants a higher minimum
@@ -24,7 +23,7 @@ function validate({ name, age, email, gamertag, password }) {
   else if (Number(age) < MIN_AGE) errors.age = `You must be at least ${MIN_AGE} to sign up.`;
   else if (Number(age) > MAX_AGE) errors.age = 'Enter a valid age.';
   if (!email.trim()) errors.email = 'Enter your college email.';
-  else if (!EMAIL_PATTERN.test(email.trim())) errors.email = 'Use a college email ending in .edu.';
+  else if (!EMAIL_PATTERN.test(email.trim())) errors.email = 'Enter a valid college email ending in .edu.';
   if (!gamertag.trim()) errors.gamertag = 'Choose a gamertag.';
   if (!password) errors.password = 'Create a password.';
   else if (password.length < 8) errors.password = 'Password must be at least 8 characters.';
