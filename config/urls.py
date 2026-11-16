@@ -20,4 +20,5 @@ from django.urls import path, include
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('map/', include('map.urls')),
+    path('api/auth/', include('accounts.urls')),  # signup/login/logout JSON API
 ]

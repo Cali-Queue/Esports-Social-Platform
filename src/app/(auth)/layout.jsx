@@ -22,8 +22,8 @@ export default function AuthLayout({ children }) {
           <ShieldCheck size={15} />
           <span>Verified email grants Student status. Athlete, Captain, Coach, and moderator badges require school or Staff approval.</span>
         </p>
-        {/* remove once the backend is hooked up */}
-        <p className={styles.disclaimer}>UI prototype only — no account, verification link, or email is created.</p>
+        {/* remove once verification emails are sent */}
+        <p className={styles.disclaimer}>Prototype — verification emails are not sent yet.</p>
       </footer>
     </main>
   );
