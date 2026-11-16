@@ -3,7 +3,9 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { Flag, Heart, MessageSquare, MoreHorizontal, Share2, Trash2 } from 'lucide-react';
-import { CURRENT_USER_HANDLE, getPlayer } from '../_data/mockPlayers';
+import { useUser } from '../../../components/AuthProvider';
+import { userProfile } from '../../../lib/auth-client.mjs';
+import { getPlayer } from '../_data/mockPlayers';
 import styles from './home.module.css';
 
 // Feed post card (Story 2.3). Likes, comments and shares are local only for now.
@@ -18,10 +20,11 @@ export default function HomePostCard({ post, onDelete }) {
   const [comments, setComments] = useState([]);
   const [draft, setDraft] = useState('');
   const [shared, setShared] = useState(false);
+  const me = userProfile(useUser());
   const { author } = post;
   // own posts link to /profile, players with a profile page link to it, others aren't linked yet
   let authorHref = null;
-  if (author.handle === CURRENT_USER_HANDLE) authorHref = '/profile';
+  if (author.handle === me.handle) authorHref = '/profile';
   else if (getPlayer(author.handle)) authorHref = `/players/${author.handle}`;
 
   function toggleLike() {
@@ -33,7 +36,7 @@ export default function HomePostCard({ post, onDelete }) {
     event.preventDefault();
     const text = draft.trim();
     if (!text) return;
-    setComments([...comments, { id: `local-${Date.now()}`, author: getPlayer(CURRENT_USER_HANDLE).gamertag, text }]);
+    setComments([...comments, { id: `local-${Date.now()}`, author: me.gamertag, text }]);
     setDraft('');
   }
 

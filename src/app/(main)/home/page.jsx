@@ -6,7 +6,9 @@ import { Bookmark, Calendar, ChevronDown, Compass, Gamepad2, Map, MessageCircle,
 import Composer from '../_components/Composer';
 import { useFollows } from '../_components/FollowProvider';
 import HomePostCard from './HomePostCard';
-import { CURRENT_USER_HANDLE, getPlayer, players } from '../_data/mockPlayers';
+import { useUser } from '../../../components/AuthProvider';
+import { userProfile } from '../../../lib/auth-client.mjs';
+import { players } from '../_data/mockPlayers';
 import { followableTeams, getFollowTarget, initialFollowing, myTeams, posts as initialPosts, recruitingTeams, upcomingEvents } from '../_data/homeFeed';
 import styles from './home.module.css';
 
@@ -19,8 +21,7 @@ const TABS = [
 const FOLLOWING_PREVIEW = 3;
 
 export default function HomePage() {
-  // TODO(backend): get the logged-in user from the session instead of mock data
-  const me = getPlayer(CURRENT_USER_HANDLE);
+  const me = userProfile(useUser());
   // TODO(backend): real suggestions endpoint
   const suggested = Object.values(players).filter((p) => p.handle !== me.handle && !initialFollowing.includes(p.handle));
 

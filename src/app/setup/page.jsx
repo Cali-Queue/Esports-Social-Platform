@@ -1,3 +1,5 @@
+import { requireUser } from '../../lib/auth';
+import { userProfile } from '../../lib/auth-client.mjs';
 import Link from 'next/link';
 import StepCard from './_components/StepCard';
 import BioAccountStep from './_components/BioAccountStep';
@@ -19,6 +21,7 @@ const steps = [
 // earlier steps show as complete and later ones as up next.
 // TODO(backend): current step should come from the user's saved setup progress
 export default async function SetupPage({ searchParams }) {
+  const me = userProfile(await requireUser());
   const { step } = await searchParams;
   const currentIndex = Math.min(Math.max(Number(step) || 1, 1), steps.length) - 1;
   const stepHref = (i) => `/setup?step=${i + 1}`;
@@ -50,13 +53,13 @@ export default async function SetupPage({ searchParams }) {
               preview={s.number === '01' && (
                 // TODO(backend): show the user's real avatar and banner
                 <div className={`${styles.media} ${styles.preview}`}>
-                  <span className={styles.avatarUpload}>KA</span>
+                  <span className={styles.avatarUpload}>{me.initials}</span>
                   <span className={styles.bannerUpload} />
                 </div>
               )}
             >
               {/* last step finishes onboarding and goes to the home feed */}
-              <Form nextHref={i < steps.length - 1 ? stepHref(i + 1) : '/home'} />
+              <Form user={me} nextHref={i < steps.length - 1 ? stepHref(i + 1) : '/home'} />
             </StepCard>
           </li>
         ))}

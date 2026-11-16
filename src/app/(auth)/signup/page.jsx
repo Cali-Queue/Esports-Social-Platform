@@ -1,5 +1,6 @@
 'use client';
 
+import { authPost } from '../../../lib/auth-client.mjs';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -56,30 +57,15 @@ export default function SignUpPage() {
 
     setSubmitting(true);
     try {
-      // Django rejects POSTs without a CSRF token. this sets the csrftoken cookie, then we read it
-      await fetch('/api/auth/csrf');
-      const csrfToken = document.cookie.split('; ').find((c) => c.startsWith('csrftoken='))?.split('=')[1] ?? '';
-
-      // goes through the /api proxy in next.config.mjs to Django's signup view.
-      // send trimmed values; age goes as a number
-      const res = await fetch('/api/auth/signup', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken },
-        body: JSON.stringify({
-          ...values,
-          name: values.name.trim(),
-          email: values.email.trim(),
-          gamertag: values.gamertag.trim(),
-          age: Number(values.age),
-        }),
-      });
+      const res = await authPost('signup', { ...values, name: values.name.trim(), email: values.email.trim(), gamertag: values.gamertag.trim(), age: Number(values.age) });
       // some error responses aren't JSON (e.g. Django's HTML 403 page), so fall back to {}
       const data = await res.json().catch(() => ({}));
 
       if (res.ok) {
         // account is created and logged in. TODO: go to /check-inbox once the
         // verification email is actually sent; until then go straight to setup.
-        router.push('/setup');
+        router.replace('/setup');
+        router.refresh();
         return;
       }
 

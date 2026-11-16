@@ -142,3 +142,70 @@ class FriendRequestTests(TestCase):
         request.respond('accepted')
         with self.assertRaises(ValidationError):
             request.respond('declined')
+
+
+@override_settings(PASSWORD_HASHERS=['django.contrib.auth.hashers.MD5PasswordHasher'])
+class SessionAuthenticationTests(TestCase):
+    def setUp(self):
+        from django.test import Client
+        self.client = Client(enforce_csrf_checks=True)
+        self.user = User.objects.create_user(
+            email='player@csus.edu', password='session-password', real_name='Player', age=20,
+        )
+        UserProfile.objects.create(user=self.user, handle='player', gamertag='PlayerOne')
+
+    def post(self, name, data=None):
+        self.client.get(reverse('auth_csrf'))
+        return self.client.post(
+            reverse(name), data or {}, content_type='application/json',
+            HTTP_X_CSRFTOKEN=self.client.cookies['csrftoken'].value,
+        )
+
+    def login(self):
+        return self.post('auth_login', {'email': ' PLAYER@CSUS.EDU ', 'password': 'session-password'})
+
+    def test_login_and_current_user_persist_across_requests(self):
+        response = self.login()
+        self.assertEqual(response.status_code, 200)
+        expected = response.json()['user']
+        self.assertEqual(expected['handle'], 'player')
+        self.assertEqual(expected['email'], self.user.email)
+        self.assertNotIn('password', expected)
+        for _ in range(2):
+            response = self.client.get(reverse('auth_me'))
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(response.json()['user'], expected)
+
+    def test_logout_invalidates_session_and_old_cookie(self):
+        from django.test import Client
+        self.login()
+        old_session = self.client.cookies['sessionid'].value
+        self.assertEqual(self.post('auth_logout').status_code, 200)
+        self.assertFalse(Session.objects.filter(session_key=old_session).exists())
+        self.assertEqual(self.client.get(reverse('auth_me')).status_code, 401)
+        replay = Client()
+        replay.cookies['sessionid'] = old_session
+        self.assertEqual(replay.get(reverse('auth_me')).status_code, 401)
+
+    def test_unauthorized_and_invalid_credentials(self):
+        self.assertEqual(self.client.get(reverse('auth_me')).status_code, 401)
+        for email, password in [('player@csus.edu', 'wrong'), ('missing@csus.edu', 'session-password')]:
+            response = self.post('auth_login', {'email': email, 'password': password})
+            self.assertEqual(response.status_code, 401)
+            self.assertEqual(response.json()['detail'], 'Invalid email or password.')
+        self.assertEqual(self.post('auth_login').status_code, 400)
+        self.assertEqual(self.client.get(reverse('auth_me')).status_code, 401)
+
+    def test_login_and_logout_require_csrf_and_post(self):
+        for name in ('auth_login', 'auth_logout'):
+            self.assertEqual(self.client.get(reverse(name)).status_code, 405)
+            self.assertEqual(self.client.post(reverse(name), {}, content_type='application/json').status_code, 403)
+        self.login()
+        response = self.client.post(reverse('auth_logout'), {}, content_type='application/json')
+        self.assertEqual(response.status_code, 403)
+        self.assertEqual(self.client.get(reverse('auth_me')).status_code, 200)
+
+    def test_inactive_user_cannot_log_in(self):
+        self.user.is_active = False
+        self.user.save()
+        self.assertEqual(self.login().status_code, 401)

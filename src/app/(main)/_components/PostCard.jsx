@@ -3,14 +3,17 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { Heart, MessageSquare, MoreHorizontal, Send } from 'lucide-react';
-import { CURRENT_USER_HANDLE, getPlayer } from '../_data/mockPlayers';
+import { useUser } from '../../../components/AuthProvider';
+import { userProfile } from '../../../lib/auth-client.mjs';
+import { getPlayer } from '../_data/mockPlayers';
 import styles from '../main.module.css';
 
 export default function PostCard({ post }) {
+  const me = userProfile(useUser());
   const author = getPlayer(post.authorHandle);
   const [liked, setLiked] = useState(false);
   // own posts link back to /profile instead of /players/<me>
-  const authorHref = author.handle === CURRENT_USER_HANDLE ? '/profile' : `/players/${author.handle}`;
+  const authorHref = author.handle === me.handle ? '/profile' : `/players/${author.handle}`;
 
   return (
     <article className={`${styles.panel} ${styles.post}`}>
