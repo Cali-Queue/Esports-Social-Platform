@@ -2,7 +2,10 @@
 #1 python manage.py makemigrations accounts
 #2 python manage.py migrate
 
+from django.core.exceptions import ValidationError
 from django.db import models
+from django.db.models import F, Q
+from django.db.models.functions import Greatest, Least
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 from django.utils import timezone
 
@@ -40,7 +43,7 @@ class User(AbstractBaseUser):
 
 #User Profile table, stores additional information about the user.
 class UserProfile(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile') #links each profile to one user and deletes the profile if the user is deleted
     handle = models.CharField(max_length=30, unique=True)
     gamertag = models.CharField(max_length=50)
     show_real_name = models.BooleanField(default=True)
@@ -96,3 +99,54 @@ class TeamMember(models.Model):
         constraints = [
             models.UniqueConstraint(fields=['team', 'user'], name='unique_player_per_team'),
         ]
+
+#Friend Request table, one student asking another to be friends.
+#A student can't send one to themselves, and only one request can be pending between the same two students
+#(in either direction). Both rules are enforced by the database as well as by send().
+class FriendRequest(models.Model):
+    STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('accepted', 'Accepted'),
+        ('declined', 'Declined'),
+        ('cancelled', 'Cancelled'),
+    ]
+
+    sender = models.ForeignKey(User, on_delete=models.CASCADE, related_name='sent_friend_requests')
+    recipient = models.ForeignKey(User, on_delete=models.CASCADE, related_name='received_friend_requests')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    created_at = models.DateTimeField(auto_now_add=True)
+    responded_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        constraints = [
+            models.CheckConstraint(condition=~Q(sender=F('recipient')), name='friend_request_not_to_self'),
+            models.UniqueConstraint(
+                Least('sender', 'recipient'),
+                Greatest('sender', 'recipient'),
+                condition=Q(status='pending'),
+                name='one_pending_friend_request_per_pair',
+            ),
+        ]
+
+    @classmethod
+    def pending_between(cls, a, b):
+        return cls.objects.filter(
+            Q(sender=a, recipient=b) | Q(sender=b, recipient=a),
+            status='pending',
+        )
+
+    @classmethod
+    def send(cls, sender, recipient):
+        if sender.pk == recipient.pk:
+            raise ValidationError("You can't send a friend request to yourself.")
+        if cls.pending_between(sender, recipient).exists():
+            raise ValidationError('A friend request between these students is already pending.')
+        return cls.objects.create(sender=sender, recipient=recipient)
+
+    def respond(self, status):
+        if self.status != 'pending':
+            raise ValidationError('This friend request has already been answered.')
+        self.status = status
+        self.responded_at = timezone.now()
+        self.save(update_fields=['status', 'responded_at'])

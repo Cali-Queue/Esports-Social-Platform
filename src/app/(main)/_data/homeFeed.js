@@ -4,11 +4,13 @@
 // their profile page.
 // TODO(backend): replace with GET /api/feed and the school events endpoint.
 
+import { getPlayer } from './mockPlayers';
+
 export const posts = [
   {
     id: 'p1',
-    tab: ['following', 'foryou'],
-    author: { displayName: 'Sac State Gold', initials: 'SG', school: 'Sacramento State', isTeam: true },
+    forYou: true,
+    author: { displayName: 'Sac State Gold', teamId: 'sac-state-gold', initials: 'SG', school: 'Sacramento State', isTeam: true },
     text: 'GG to UC Davis in the NorCal Valorant quarterfinals. 13-9, 13-11. Semis this Saturday at 6pm in the esports lab, come through and bring the noise.',
     media: { kind: 'scoreboard', home: 'Sac State', away: 'UC Davis', score: '2 - 0', label: 'NorCal Valorant · Quarterfinal' },
     game: 'Valorant',
@@ -19,7 +21,7 @@ export const posts = [
   },
   {
     id: 'p2',
-    tab: ['following', 'foryou'],
+    forYou: true,
     author: { displayName: 'NovaVex', handle: 'novavex', initials: 'NV', school: 'UC Davis', role: 'Captain' },
     text: 'Late-night scrim, cleaner comms, better trades. Looking for two more California collegiate teams for next week’s set.',
     media: { kind: 'image', src: '/images/post-arena.jpg' },
@@ -31,7 +33,7 @@ export const posts = [
   },
   {
     id: 'p3',
-    tab: ['foryou'],
+    forYou: true,
     author: { displayName: 'Cal Poly SLO Esports', initials: 'CP', school: 'Cal Poly SLO', isTeam: true },
     text: 'Rocket League tryouts open next week. We are looking for a third with strong rotations. Diamond 3+ preferred, drop your tracker below.',
     media: { kind: 'banner', title: 'Rocket League Tryouts', subtitle: 'Oct 24 to 26 · Cal Poly SLO' },
@@ -43,7 +45,7 @@ export const posts = [
   },
   {
     id: 'p4',
-    tab: ['following'],
+    forYou: false,
     author: { displayName: 'AstraZen', handle: 'astrazen', initials: 'AZ', school: 'Sacramento State', role: 'Athlete' },
     text: 'Back in Immortal 1. Huge thanks to the squad for duo grinding every night this month. Running VOD review in the lab Wednesday if anyone wants in.',
     game: 'Valorant',
@@ -54,7 +56,7 @@ export const posts = [
   },
   {
     id: 'p5',
-    tab: ['foryou'],
+    forYou: true,
     author: { displayName: 'Ana Lucero', initials: 'AL', school: 'San Jose State', role: 'Athlete' },
     text: 'Anyone on a California campus streaming League this weekend? Putting together a collegiate co-stream for the regional finals.',
     game: 'League of Legends',
@@ -72,11 +74,32 @@ export const upcomingEvents = [
 ];
 
 export const recruitingTeams = [
-  { id: 't1', name: 'Hornet Hive', meta: 'Sacramento State · Rocket League', need: 'Needs 1 striker' },
-  { id: 't2', name: 'Aggie Esports', meta: 'UC Davis · Overwatch 2', need: 'Needs a support' },
+  { id: 'hornet-hive', need: 'Needs 1 striker' },
+  { id: 'aggie-esports', need: 'Needs a support' },
 ];
 
 export const myTeams = [
-  { id: 'mt1', name: 'Sac State Gold', game: 'Valorant', role: 'Athlete' },
+  { id: 'sac-state-gold', name: 'Sac State Gold', game: 'Valorant', role: 'Athlete' },
   { id: 'mt2', name: 'Stingers', game: 'League of Legends', role: 'Athlete' },
 ];
+
+// Teams you can follow, keyed the same way as player handles.
+export const followableTeams = {
+  'uc-davis-esports': { name: 'UC Davis Esports', initials: 'UC', meta: 'UC Davis · Valorant' },
+  'sfsu-esports': { name: 'SFSU Esports', initials: 'SF', meta: 'San Francisco State · Overwatch 2' },
+  'csuf-esports': { name: 'CSUF Esports', initials: 'CF', meta: 'Cal State Fullerton · Rocket League' },
+  'hornet-hive': { name: 'Hornet Hive', initials: 'HH', meta: 'Sacramento State · Rocket League' },
+  'aggie-esports': { name: 'Aggie Esports', initials: 'AE', meta: 'UC Davis · Overwatch 2' },
+};
+
+export const initialFollowing = ['uc-davis-esports', 'sfsu-esports', 'astrazen', 'csuf-esports'];
+
+// Turns a followed id (team id or player handle) into what the Following section shows.
+// TODO(backend): link teams to their own page once /teams/[id] exists.
+export function getFollowTarget(id) {
+  const team = followableTeams[id];
+  if (team) return { id, ...team, isTeam: true, href: '/teams' };
+  const player = getPlayer(id);
+  if (!player) return null;
+  return { id, name: player.gamertag, initials: player.initials, meta: `Player · ${player.game}`, href: `/players/${player.handle}` };
+}

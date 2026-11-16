@@ -1,10 +1,11 @@
 /* Three-column layout */
 .layout{max-width:1360px;margin:0 auto;padding:28px 32px 56px;display:grid;grid-template-columns:260px minmax(0,1fr) 300px;gap:24px;align-items:start}
-.left,.right{display:grid;gap:16px;position:sticky;top:96px}
+/* 96 top offset + 16 gap, so tall columns scroll on their own instead of running off screen */
+.left,.right{display:grid;grid-template-columns:minmax(0,1fr);gap:16px;position:sticky;top:96px;max-height:calc(100vh - 112px);overflow-y:auto;scrollbar-width:thin}
 .feed{display:grid;gap:16px;min-width:0}
 
 /* Shared panels */
-.panel{background:#12141d;border:1px solid #232a3b;border-radius:16px;padding:16px;display:grid;gap:4px}
+.panel{background:#12141d;border:1px solid #232a3b;border-radius:16px;padding:16px;display:grid;grid-template-columns:minmax(0,1fr);gap:4px}
 .panelHead{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px}
 .panelTitle{font-size:13px;font-weight:700;letter-spacing:.2px;color:#c8cbd8;margin:0 0 6px}
 .panelHead .panelTitle{margin:0}
@@ -48,6 +49,18 @@
 .personRow{display:flex;align-items:center;gap:10px;padding:8px 0}
 .personRow .avatar{width:36px;height:36px;font-size:11px}
 .personRow .rowText:hover .rowTitle{text-decoration:underline}
+/* My Team and Following */
+.network{gap:14px}
+.networkGroup{display:grid;grid-template-columns:minmax(0,1fr);gap:2px;min-width:0}
+.networkGroup + .networkGroup{border-top:1px solid #1e2433;padding-top:14px}
+.sectionTitle{font-size:12px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:#c8cbd8;margin:0 0 6px}
+.avatarRow{width:36px;height:36px;font-size:11px}
+.networkEmpty{margin:0;font-size:12.5px;line-height:1.5;color:#9198ab}
+.viewMore{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:36px;margin-top:4px;border:0;border-radius:10px;background:none;color:#c8cbd8;font-size:13px;font-weight:600;cursor:pointer;transition:background .15s,color .15s}
+.viewMore:hover{background:#1b1d29;color:#fff}
+.viewMore svg{transition:transform .15s}
+.chevronOpen{transform:rotate(180deg)}
+
 .followButton,.followingButton{flex:none;min-height:32px;padding:0 14px;border-radius:9px;font-size:12.5px;font-weight:700;cursor:pointer;transition:filter .15s,background .15s}
 .followButton{background:#7957fa;color:#fff;border:0}
 .followButton:hover{filter:brightness(1.12)}
@@ -72,10 +85,10 @@
 .primaryButton:disabled{opacity:.45;cursor:not-allowed}
 
 /* Feed tabs */
-.tabs{display:flex;gap:4px;background:#12141d;border:1px solid #232a3b;border-radius:14px;padding:4px}
-.tab{flex:1;min-height:38px;border:0;border-radius:10px;background:none;color:#8f96aa;font-size:13.5px;font-weight:700;cursor:pointer;transition:background .15s,color .15s}
+.tabs{display:flex;gap:24px}
+.tab{padding:2px 0;border:0;background:none;color:#8f96aa;font-size:15px;font-weight:500;cursor:pointer;transition:color .15s}
 .tab:hover{color:#fff}
-.tabActive{background:#1e2538;color:#fff;box-shadow:inset 0 -2px 0 #7957fa}
+.tabActive{color:#fff;font-weight:700}
 
 /* Post card */
 .post{background:#12141d;border:1px solid #232a3b;border-radius:16px;padding:16px 18px;display:grid;gap:12px;transition:border-color .15s}
@@ -111,6 +124,13 @@
 .action{display:inline-flex;align-items:center;gap:7px;padding:7px 10px;border-radius:9px;border:0;background:none;color:#8f96aa;font-size:13px;font-weight:600;cursor:pointer;transition:background .15s,color .15s}
 .action:hover{background:#1b1d29;color:#fff}
 .actionLiked,.actionLiked:hover{color:#ff587b}
+.actionOn,.actionOn:hover{color:#a88aff}
+.comments{display:grid;gap:10px}
+.comment{margin:0;padding:9px 12px;border-radius:10px;background:#0e1018;font-size:13.5px;line-height:1.5;color:#e3e3ee;overflow-wrap:anywhere}
+.commentForm{display:flex;gap:8px}
+.commentInput{flex:1;min-width:0;min-height:38px;padding:0 12px;border:1px solid #262c3d;border-radius:10px;background:#0e1018;color:#f3f3f9;outline:none;font-size:13.5px;transition:border-color .16s}
+.commentInput:focus{border-color:#8a69ff}
+.commentInput::placeholder{color:#6c7388}
 .confirm{display:flex;align-items:center;gap:8px;border-top:1px solid #1e2433;padding-top:10px;font-size:13px;color:#d6d8e3}
 .confirm span{flex:1}
 .ghostSmall,.dangerSmall{min-height:32px;padding:0 12px;border-radius:9px;font-size:12.5px;font-weight:700;cursor:pointer}
@@ -126,12 +146,18 @@
 
 @media(max-width:1180px){
   .layout{grid-template-columns:minmax(0,1fr) 300px}
-  .left{display:none}
+  /* keep My Team and Following, side by side above the feed */
+  .left{grid-column:1 / -1;position:static;max-height:none;overflow:visible}
+  .profileCard,.shortcuts{display:none}
+  .network{grid-template-columns:repeat(2,minmax(0,1fr));gap:24px;align-items:start}
+  .networkGroup + .networkGroup{border-top:0;padding-top:0}
 }
 
 @media(max-width:860px){
   .layout{grid-template-columns:minmax(0,1fr);padding:16px 16px 40px}
-  .right{position:static}
+  .right{position:static;max-height:none;overflow:visible}
+  .network{grid-template-columns:minmax(0,1fr);gap:14px}
+  .networkGroup + .networkGroup{border-top:1px solid #1e2433;padding-top:14px}
 }
 
 @media(max-width:480px){

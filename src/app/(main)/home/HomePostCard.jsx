@@ -6,7 +6,7 @@ import { Flag, Heart, MessageSquare, MoreHorizontal, Share2, Trash2 } from 'luci
 import { CURRENT_USER_HANDLE, getPlayer } from '../_data/mockPlayers';
 import styles from './home.module.css';
 
-// Feed post card (Story 2.3). Likes are local only for now.
+// Feed post card (Story 2.3). Likes, comments and shares are local only for now.
 // TODO(backend): POST/DELETE /api/posts/:id/like, comments, report.
 export default function HomePostCard({ post, onDelete }) {
   const [liked, setLiked] = useState(post.likedByMe);
@@ -14,6 +14,10 @@ export default function HomePostCard({ post, onDelete }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [confirming, setConfirming] = useState(false);
   const [reported, setReported] = useState(false);
+  const [commentsOpen, setCommentsOpen] = useState(false);
+  const [comments, setComments] = useState([]);
+  const [draft, setDraft] = useState('');
+  const [shared, setShared] = useState(false);
   const { author } = post;
   // own posts link to /profile, players with a profile page link to it, others aren't linked yet
   let authorHref = null;
@@ -23,6 +27,14 @@ export default function HomePostCard({ post, onDelete }) {
   function toggleLike() {
     setLikes(likes + (liked ? -1 : 1));
     setLiked(!liked);
+  }
+
+  function addComment(event) {
+    event.preventDefault();
+    const text = draft.trim();
+    if (!text) return;
+    setComments([...comments, { id: `local-${Date.now()}`, author: getPlayer(CURRENT_USER_HANDLE).gamertag, text }]);
+    setDraft('');
   }
 
   return (
@@ -104,13 +116,43 @@ export default function HomePostCard({ post, onDelete }) {
           >
             <Heart size={16} fill={liked ? 'currentColor' : 'none'} /> {likes}
           </button>
-          <button type="button" className={styles.action}>
-            <MessageSquare size={16} /> {post.commentCount}
+          <button
+            type="button"
+            className={`${styles.action} ${commentsOpen ? styles.actionOn : ''}`}
+            aria-expanded={commentsOpen}
+            aria-label={`${post.commentCount + comments.length} comments`}
+            onClick={() => setCommentsOpen(!commentsOpen)}
+          >
+            <MessageSquare size={16} /> {post.commentCount + comments.length}
           </button>
-          <button type="button" className={styles.action}>
-            <Share2 size={16} /> Share
+          <button
+            type="button"
+            className={`${styles.action} ${shared ? styles.actionOn : ''}`}
+            aria-pressed={shared}
+            onClick={() => setShared(!shared)}
+          >
+            <Share2 size={16} /> {shared ? 'Shared' : 'Share'}
           </button>
         </footer>
+      )}
+
+      {commentsOpen && (
+        <div className={styles.comments}>
+          {comments.map((comment) => (
+            <p key={comment.id} className={styles.comment}><strong>{comment.author}</strong> {comment.text}</p>
+          ))}
+          <form className={styles.commentForm} onSubmit={addComment}>
+            <input
+              type="text"
+              className={styles.commentInput}
+              placeholder="Write a comment..."
+              aria-label="Write a comment"
+              value={draft}
+              onChange={(event) => setDraft(event.target.value)}
+            />
+            <button type="submit" className={styles.primaryButton} disabled={!draft.trim()}>Reply</button>
+          </form>
+        </div>
       )}
     </article>
   );

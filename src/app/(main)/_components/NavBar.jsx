@@ -5,9 +5,10 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { Bell, ChevronDown, Compass, House, LogOut, Map as MapIcon, MessageCircle, Search, UserRound } from 'lucide-react';
 import { CURRENT_USER_HANDLE, getPlayer } from '../_data/mockPlayers';
+import { useFriendRequests } from './FriendRequestsProvider';
 import styles from '../main.module.css';
 
-// discover, map, messages and notifications are placeholder pages until those tickets are done
+// map and messages are placeholder pages until those tickets are done
 const LINKS = [
   { href: '/home', label: 'Home Feed', icon: House },
   { href: '/discover', label: 'Discover', icon: Compass, match: ['/discover', '/players'] },
@@ -20,6 +21,7 @@ export default function NavBar() {
   const pathname = usePathname();
   const router = useRouter();
   const me = getPlayer(CURRENT_USER_HANDLE);
+  const { incoming } = useFriendRequests();
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef(null);
 
@@ -53,14 +55,19 @@ export default function NavBar() {
       <nav className={styles.navLinks} aria-label="Main">
         {LINKS.map(({ href, label, icon: Icon, match = [href] }) => {
           const active = match.some((path) => pathname.startsWith(path));
+          const badge = href === '/notifications' ? incoming.length : 0;
           return (
             <Link
               key={href}
               href={href}
               className={`${styles.navLink} ${active ? styles.navLinkActive : ''}`}
               aria-current={active ? 'page' : undefined}
+              aria-label={badge ? `${label}, ${badge} new` : undefined}
             >
-              <Icon size={18} />
+              <span className={styles.navIcon}>
+                <Icon size={18} />
+                {badge > 0 && <span className={styles.navBadge}>{badge}</span>}
+              </span>
               <span>{label}</span>
             </Link>
           );

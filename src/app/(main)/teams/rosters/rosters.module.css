@@ -1,0 +1,97 @@
+.filterRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.filterChip {
+  background-color: #1a202c;
+  color: var(--text-muted);
+  border: none;
+  padding: 7px 14px;
+  border-radius: 16px;
+  font-size: 12px;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.filterChip:hover {
+  color: var(--text-main);
+}
+
+.filterChipActive {
+  background-color: var(--accent-purple);
+  color: white;
+}
+
+.rosterPanel {
+  padding: 8px 0;
+}
+
+.rosterHead,
+.rosterRow {
+  display: grid;
+  grid-template-columns: 2fr 1.5fr 1.5fr;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 20px;
+}
+
+.rosterHead {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.rosterRow {
+  font-size: 14px;
+  border-bottom: 1px solid var(--border-color);
+  cursor: pointer;
+  transition: background-color 0.15s;
+}
+
+.rosterRow:last-child {
+  border-bottom: none;
+}
+
+.rosterRow:hover {
+  background-color: #1a2035;
+}
+
+.rosterPlayer {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.gamertag {
+  color: var(--accent-teal);
+  font-weight: 600;
+}
+
+.rosterGame {
+  color: var(--text-muted);
+}
+
+.empty {
+  padding: 12px 20px;
+}
+
+@media (max-width: 640px) {
+  .rosterHead {
+    display: none;
+  }
+  .rosterRow {
+    grid-template-columns: 1fr auto;
+    padding: 12px 16px;
+  }
+  .rosterGame {
+    grid-column: 1 / -1;
+    font-size: 12px;
+    margin-left: 46px;
+  }
+}

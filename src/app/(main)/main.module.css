@@ -17,6 +17,8 @@
 .navLink:hover{color:var(--text);background:var(--surface-2)}
 .navLinkActive{color:var(--text);background:#1d2030}
 .navLinkActive svg{color:#9b80ff}
+.navIcon{position:relative;display:inline-flex}
+.navBadge{position:absolute;top:-6px;right:-6px;min-width:16px;height:16px;padding:0 4px;display:inline-flex;align-items:center;justify-content:center;border-radius:999px;background:#ff587b;color:#fff;font-size:10px;font-weight:700;line-height:1;border:2px solid #0d0f15}
 .navRight{margin-left:auto;display:flex;align-items:center;gap:14px}
 .search{display:flex;align-items:center;gap:10px;width:260px;height:40px;padding:0 14px;border:1px solid var(--border);border-radius:11px;background:#0b0d13;color:var(--faint);transition:border-color .15s}
 .search:focus-within{border-color:#8a69ff}
@@ -44,6 +46,7 @@
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:48px;padding:0 22px;border-radius:12px;border:1px solid transparent;font-size:15px;font-weight:500;color:#fff;text-decoration:none;cursor:pointer;white-space:nowrap;transition:filter .15s,transform .15s,background .15s}
 .btn:hover{filter:brightness(1.12);transform:translateY(-1px)}
 .btn:active{transform:none}
+.btn:disabled{cursor:default;opacity:.7;filter:none;transform:none}
 .btnPrimary{background:var(--purple)}
 .btnSecondary{background:#1d2030e6;color:#e3e4ee}
 .btnOutline{background:#0d0f15cc;border-color:#34394d;color:#e3e4ee}
@@ -142,7 +145,7 @@
   .overview{grid-row:1 / span 2;grid-column:2}
 }
 @media(max-width:900px){
-  .navLink span{display:none}
+  .navLink > span:last-child{display:none}
   .search{display:none}
   .profileGrid{grid-template-columns:1fr;padding:0 20px;gap:22px}
   .sidebar,.overview{grid-column:auto;grid-row:auto}
