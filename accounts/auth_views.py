@@ -15,9 +15,11 @@ from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.http import JsonResponse
+from django.utils import timezone
 from django.views.decorators.csrf import ensure_csrf_cookie
 from django.views.decorators.http import require_GET, require_POST
 
+from . import login_protection
 from .models import User, UserProfile
 from .validators import validate_college_email
 
@@ -144,8 +146,21 @@ def signup(request):
     return JsonResponse({'user': _user_json(user), 'emailSent': email_sent}, status=201)
 
 
+#429 response while an email is locked out. lockedUntil lets the frontend show the time and count down
+def _locked_response(until):
+    retry_after = max(1, int((until - timezone.now()).total_seconds()))
+    response = JsonResponse({
+        'detail': login_protection.lockout_message(until),
+        'lockedUntil': until.isoformat(),
+        'retryAfter': retry_after,
+    }, status=429)
+    response['Retry-After'] = str(retry_after)
+    return response
+
+
 #POST /api/auth/login/ - body: { email, password }
-#200 with { user } and starts a session, 401 if the email/password is wrong
+#200 with { user } and starts a session, 401 if the email/password is wrong,
+#429 with { detail, lockedUntil, retryAfter } after too many failed attempts (see login_protection.py)
 @require_POST
 def login_view(request):
     data = _read_json(request)
@@ -157,12 +172,21 @@ def login_view(request):
     if not email or not password:
         return JsonResponse({'detail': 'Enter your email and password.'}, status=400)
 
+    # checked before the password, so a locked email stays blocked even with the right password
+    until = login_protection.locked_until(email)
+    if until:
+        return _locked_response(until)
+
     # checks the hashed password, returns None for wrong creds or inactive users
     user = authenticate(request, email=email, password=password)
     if user is None:
+        until = login_protection.record_failure(email, request.META.get('REMOTE_ADDR'))
+        if until:
+            return _locked_response(until)
         # same message for wrong email and wrong password so emails can't be probed
         return JsonResponse({'detail': 'Invalid email or password.'}, status=401)
 
+    login_protection.clear_failures(email)
     login(request, user)
     return JsonResponse({'user': _user_json(user)})
 

@@ -157,3 +157,23 @@ class EmailVerification(models.Model):
     token_hash = models.CharField(max_length=64, unique=True)
     email = models.EmailField(max_length=100)
     sent_at = models.DateTimeField()
+
+
+#Failed Login Attempt table, one row per wrong email/password on the login form.
+#Keyed by the email that was typed instead of a User FK, so made-up emails get tracked and locked
+#the same way as real ones. Otherwise the lockout itself would reveal which accounts exist.
+#The rules that use this table are in login_protection.py.
+class FailedLoginAttempt(models.Model):
+    email = models.EmailField(max_length=100, db_index=True)
+    ip_address = models.GenericIPAddressField(null=True, blank=True)
+    attempted_at = models.DateTimeField(default=timezone.now, db_index=True)
+
+    class Meta:
+        ordering = ['-attempted_at']
+
+#Login Lockout table, one row per email that hit the failed-attempt limit.
+#Login is blocked until locked_until, even with the right password.
+class LoginLockout(models.Model):
+    email = models.EmailField(max_length=100, unique=True)
+    locked_until = models.DateTimeField()
+    created_at = models.DateTimeField(auto_now_add=True)
