@@ -1,14 +1,33 @@
-import Link from 'next/link';
+'use client';
+
+import { useEffect, useState } from 'react';
 import { ImagePlus } from 'lucide-react';
+import useSetupStep from './useSetupStep';
 import styles from '../setup.module.css';
 
 // Step 1 form: avatar, banner, bio, real name
-// UI only — nothing is uploaded or saved yet
+// bio + real name are saved. avatar/banner upload is a separate subtask
 export default function BioAccountStep({ nextHref, user }) {
+  const { profile, errors, formError, saving, submit } = useSetupStep(nextHref);
+  const [bio, setBio] = useState('');
+  const [realName, setRealName] = useState(user.realName);
+
+  // fill in what's already saved once the profile loads
+  useEffect(() => {
+    if (!profile) return;
+    setBio(profile.bio);
+    setRealName(profile.real_name);
+  }, [profile]);
+
+  function handleSubmit(event) {
+    event.preventDefault();
+    submit({ bio, real_name: realName });
+  }
+
   return (
-    <form className={styles.form}>
+    <form className={styles.form} onSubmit={handleSubmit} noValidate>
       <div className={styles.media}>
-        {/* TODO(backend): show the uploaded avatar instead of initials */}
+        {/* TODO(avatar subtask): upload + show the real avatar instead of initials */}
         <label className={styles.avatarUpload} title="Upload avatar">
           {user.initials}
           <input type="file" accept="image/*" className={styles.fileInput} aria-label="Upload avatar" />
@@ -28,16 +47,30 @@ export default function BioAccountStep({ nextHref, user }) {
           rows={3}
           maxLength={160}
           placeholder="Controller main, looking for scrims on weeknights."
+          value={bio}
+          onChange={(event) => setBio(event.target.value)}
         />
-        <p className={styles.hint}>Up to 160 characters</p>
+        {errors.bio ? <p className={styles.error}>{errors.bio}</p> : <p className={styles.hint}>Up to 160 characters</p>}
       </div>
 
       <div className={styles.field}>
         <label htmlFor="setup-real-name" className={styles.label}>Real name</label>
-        <input id="setup-real-name" className={styles.input} defaultValue={user.realName} required />
+        <input
+          id="setup-real-name"
+          className={styles.input}
+          maxLength={200}
+          value={realName}
+          onChange={(event) => setRealName(event.target.value)}
+        />
+        {errors.real_name && <p className={styles.error}>{errors.real_name}</p>}
       </div>
 
-      <Link href={nextHref} className={`${styles.button} ${styles.purple}`}>Continue</Link>
+      {formError && <p className={styles.error} role="alert">{formError}</p>}
+
+      {/* disabled until the profile loads so we never save over it with empty fields */}
+      <button type="submit" className={`${styles.button} ${styles.purple}`} disabled={!profile || saving}>
+        {saving ? 'Saving…' : 'Continue'}
+      </button>
     </form>
   );
 }

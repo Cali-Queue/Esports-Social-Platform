@@ -39,7 +39,7 @@ export default async function MyProfilePage() {
         </div>
       }
       actions={
-        // TODO: /setup is the "Make your player page recruitable" flow from the Figma (not built yet)
+        // /setup is the "Make your player page recruitable" flow; it saves to /api/profile/me
         <Link href="/setup" className={`${styles.btn} ${styles.btnPrimary}`}>
           <Pencil size={16} /> Edit profile
         </Link>
