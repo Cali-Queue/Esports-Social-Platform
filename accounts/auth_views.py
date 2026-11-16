@@ -3,6 +3,9 @@
 #value back in the X-CSRFToken header on every POST.
 
 import json
+import logging
+
+from .email_verification import send_verification, verify
 
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.password_validation import validate_password
@@ -132,10 +135,10 @@ def signup(request):
         user = User.objects.create_user(email=email, password=password, real_name=name, age=age)
         UserProfile.objects.create(user=user, gamertag=gamertag, handle=gamertag.lower())
 
-    # TODO: send the verification email here (check-inbox page expects one)
-    # starts the session so the user is logged in right after signing up
+    # Keep a restricted session so delivery failures can be retried.
+    email_sent = _deliver(user)
     login(request, user)
-    return JsonResponse({'user': _user_json(user)}, status=201)
+    return JsonResponse({'user': _user_json(user), 'emailSent': email_sent}, status=201)
 
 
 #POST /api/auth/login/ - body: { email, password }
@@ -174,3 +177,31 @@ def me(request):
     if not request.user.is_authenticated:
         return JsonResponse({'detail': 'Not logged in.'}, status=401)
     return JsonResponse({'user': _user_json(request.user)})
+
+
+def _deliver(user):
+    try:
+        send_verification(user)
+        return True
+    except Exception:
+        # Do not log tokens, message bodies, addresses, or backend credentials.
+        logging.getLogger(__name__).error('Verification email delivery failed.')
+        return False
+
+
+@require_POST
+def resend_verification(request):
+    # No email lookup: only the session owner can request mail for their account.
+    if not request.user.is_authenticated:
+        return JsonResponse({'detail': 'Not logged in.'}, status=401)
+    if not _deliver(request.user):
+        return JsonResponse({'detail': 'Unable to send email. Please try again.'}, status=503)
+    return JsonResponse({'detail': 'If verification is needed, a link will be sent. Please allow 60 seconds between requests.'})
+
+
+@require_POST
+def verify_email(request):
+    data = _read_json(request)
+    if data is None or not verify(data.get('token')):
+        return JsonResponse({'detail': 'This verification link is invalid or expired.'}, status=400)
+    return JsonResponse({'detail': 'Email verified.'})

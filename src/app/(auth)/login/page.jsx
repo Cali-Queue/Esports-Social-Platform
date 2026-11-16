@@ -33,7 +33,7 @@ export default function LoginPage() {
       const data = await res.json().catch(() => ({}));
 
       if (res.ok) {
-        router.replace('/home');
+        router.replace(data.user.isEmailVerified ? '/home' : '/check-inbox');
         router.refresh();
         return;
       }

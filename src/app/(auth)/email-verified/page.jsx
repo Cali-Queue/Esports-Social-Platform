@@ -5,8 +5,7 @@ import styles from '../auth.module.css';
 
 export const metadata = { title: 'Email verified · Cali Queue' };
 
-// Where the verification link lands if the token is valid.
-// School name is hardcoded until we can look it up from the email domain.
+
 export default function EmailVerifiedPage() {
   return (
     <StatusCard
@@ -19,7 +18,7 @@ export default function EmailVerifiedPage() {
       }
     >
       <p className={styles.lead}>
-        <strong>Sacramento State</strong> affiliation confirmed. You now have Student status.
+        Your college email has been verified.
       </p>
     </StatusCard>
   );

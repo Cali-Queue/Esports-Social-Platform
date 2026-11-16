@@ -62,9 +62,7 @@ export default function SignUpPage() {
       const data = await res.json().catch(() => ({}));
 
       if (res.ok) {
-        // account is created and logged in. TODO: go to /check-inbox once the
-        // verification email is actually sent; until then go straight to setup.
-        router.replace('/setup');
+        router.replace(data.emailSent ? '/check-inbox' : '/check-inbox?delivery=failed');
         router.refresh();
         return;
       }

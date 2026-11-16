@@ -9,5 +9,6 @@ export async function requireUser() {
     (await cookies()).toString(), process.env.DJANGO_URL || 'http://127.0.0.1:8000',
   );
   if (!user) redirect('/login');
+  if (!user.isEmailVerified) redirect('/check-inbox');
   return user;
 }

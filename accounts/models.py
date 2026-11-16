@@ -150,3 +150,10 @@ class FriendRequest(models.Model):
         self.status = status
         self.responded_at = timezone.now()
         self.save(update_fields=['status', 'responded_at'])
+
+
+class EmailVerification(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    token_hash = models.CharField(max_length=64, unique=True)
+    email = models.EmailField(max_length=100)
+    sent_at = models.DateTimeField()

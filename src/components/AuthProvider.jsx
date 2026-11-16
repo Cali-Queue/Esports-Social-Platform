@@ -22,7 +22,10 @@ export function AuthProvider({ user, children }) {
           router.refresh();
         } else if (response.ok) {
           const data = await response.json();
-          if (active) { setCurrentUser(data.user); setError(''); }
+          if (active) {
+            if (!data.user.isEmailVerified) { router.replace('/check-inbox'); router.refresh(); return; }
+            setCurrentUser(data.user); setError('');
+          }
         } else setError('Unable to load your session. Please reload to try again.');
       } catch {
         if (active) setError('Unable to load your session. Please reload to try again.');

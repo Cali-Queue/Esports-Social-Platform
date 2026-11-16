@@ -209,3 +209,127 @@ class SessionAuthenticationTests(TestCase):
         self.user.is_active = False
         self.user.save()
         self.assertEqual(self.login().status_code, 401)
+
+
+@override_settings(EMAIL_BACKEND='django.core.mail.backends.locmem.EmailBackend',
+                   PASSWORD_HASHERS=['django.contrib.auth.hashers.MD5PasswordHasher'])
+class EmailVerificationTests(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(email='verify@csus.edu', password='password')
+        self.client.force_login(self.user)
+
+    def token(self):
+        from django.core import mail
+        from urllib.parse import parse_qs
+        return parse_qs(mail.outbox[-1].body.split('#')[1].split('\n')[0])['token'][0]
+
+    def send(self):
+        return self.client.post(reverse('auth_resend_verification'), {}, content_type='application/json')
+
+    def verify(self, token):
+        return self.client.post(reverse('auth_verify_email'), {'token': token}, content_type='application/json')
+
+    def test_valid_single_use_and_no_plaintext_storage(self):
+        from .models import EmailVerification
+        self.assertEqual(self.send().status_code, 200)
+        token = self.token()
+        self.assertNotEqual(EmailVerification.objects.get().token_hash, token)
+        self.assertEqual(self.verify(token).status_code, 200)
+        self.user.refresh_from_db()
+        self.assertTrue(self.user.isEmailVerified)
+        self.assertEqual(self.verify(token).status_code, 400)
+        self.assertFalse(EmailVerification.objects.exists())
+
+    def test_expired_boundary_tampered_and_malformed(self):
+        from datetime import timedelta
+        from unittest.mock import patch
+        from django.utils import timezone
+        from .models import EmailVerification
+        self.send()
+        token = self.token()
+        for value in (token + 'x', 'x' * 43, None, {}, 12):
+            self.assertEqual(self.verify(value).status_code, 400)
+        sent_at = EmailVerification.objects.get().sent_at
+        with patch('accounts.email_verification.timezone.now', return_value=sent_at + timedelta(hours=24)):
+            self.assertEqual(self.verify(token).status_code, 400)
+        self.user.refresh_from_db()
+        self.assertFalse(self.user.isEmailVerified)
+
+    def test_resend_cooldown_and_replacement(self):
+        from datetime import timedelta
+        from django.core import mail
+        from django.utils import timezone
+        from .models import EmailVerification
+        self.send()
+        old = self.token()
+        self.send()
+        self.assertEqual(len(mail.outbox), 1)
+        EmailVerification.objects.update(sent_at=timezone.now() - timedelta(minutes=2))
+        self.send()
+        self.assertEqual(len(mail.outbox), 2)
+        self.assertEqual(self.verify(old).status_code, 400)
+        self.assertEqual(self.verify(self.token()).status_code, 200)
+        self.send()
+        self.assertEqual(len(mail.outbox), 2)
+
+    def test_failure_preserves_previous_link(self):
+        from datetime import timedelta
+        from unittest.mock import patch
+        from django.utils import timezone
+        from .models import EmailVerification
+        self.send()
+        token = self.token()
+        EmailVerification.objects.update(sent_at=timezone.now() - timedelta(minutes=2))
+        for result in (RuntimeError('delivery failed'), 0):
+            kwargs = {'side_effect': result} if isinstance(result, Exception) else {'return_value': result}
+            with patch('accounts.email_verification.send_mail', **kwargs):
+                self.assertEqual(self.send().status_code, 503)
+        self.assertEqual(self.verify(token).status_code, 200)
+
+    def test_signup_delivery_failure_keeps_recoverable_unverified_session(self):
+        from unittest.mock import patch
+        from .models import EmailVerification
+        with patch('accounts.email_verification.send_mail', side_effect=RuntimeError()):
+            response = self.client.post(reverse('auth_signup'), {
+                'name': 'Player', 'age': 20, 'email': 'new@csus.edu',
+                'gamertag': 'newplayer', 'password': 'Q7!mV2#rT9$xL4',
+            }, content_type='application/json')
+        self.assertEqual(response.status_code, 201)
+        self.assertFalse(response.json()['emailSent'])
+        self.assertFalse(response.json()['user']['isEmailVerified'])
+        self.assertFalse(EmailVerification.objects.exists())
+        self.assertEqual(self.send().status_code, 200)
+
+    def test_resend_does_not_lookup_supplied_email(self):
+        from django.test import Client
+        from django.core import mail
+        anonymous = Client()
+        responses = [anonymous.post(reverse('auth_resend_verification'), {'email': email},
+                                    content_type='application/json')
+                     for email in (self.user.email, 'absent@csus.edu')]
+        self.assertEqual(responses[0].status_code, 401)
+        self.assertEqual(responses[0].content, responses[1].content)
+        self.client.post(reverse('auth_resend_verification'), {'email': 'absent@csus.edu'},
+                         content_type='application/json')
+        self.assertEqual(mail.outbox[-1].to, [self.user.email])
+
+    def test_methods_csrf_and_restricted_session(self):
+        from django.test import Client
+        secure = Client(enforce_csrf_checks=True)
+        secure.force_login(self.user)
+        for name in ('auth_verify_email', 'auth_resend_verification'):
+            self.assertEqual(secure.get(reverse(name)).status_code, 405)
+            self.assertEqual(secure.post(reverse(name), {}, content_type='application/json').status_code, 403)
+        self.assertEqual(self.client.get('/api/discover/players/').status_code, 403)
+        self.assertEqual(self.client.get(reverse('auth_me')).status_code, 200)
+
+    def test_changed_email_or_inactive_account_cannot_verify(self):
+        self.send()
+        token = self.token()
+        self.user.email = 'changed@csus.edu'
+        self.user.save()
+        self.assertEqual(self.verify(token).status_code, 400)
+        self.user.email = 'verify@csus.edu'
+        self.user.is_active = False
+        self.user.save()
+        self.assertEqual(self.verify(token).status_code, 400)
