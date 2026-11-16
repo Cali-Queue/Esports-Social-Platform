@@ -22,7 +22,8 @@ export default function UserDirectory({ initialQuery, initialStatus }) {
   const [query, setQuery] = useState(initialQuery);
   const [role, setRole] = useState('all');
   const [status, setStatus] = useState(STATUSES.some(([v]) => v === initialStatus) ? initialStatus : 'all');
-  const [sort, setSort] = useState({ key: 'username', dir: 'asc' });
+  // no sort until a header is clicked, so the list starts in the Figma's order
+  const [sort, setSort] = useState({ key: null, dir: 'asc' });
   const [page, setPage] = useState(1);
   const [viewing, setViewing] = useState(null);
 
@@ -32,6 +33,7 @@ export default function UserDirectory({ initialQuery, initialStatus }) {
     .filter((u) => role === 'all' || u.role === role)
     .filter((u) => status === 'all' || u.status === status)
     .sort((a, b) => {
+      if (!sort.key) return 0;
       const result = sort.key === 'memberSince'
         ? a.memberSince.localeCompare(b.memberSince)
         : a.username.localeCompare(b.username, undefined, { sensitivity: 'base' });
