@@ -22,4 +22,5 @@ urlpatterns = [
     path("api/discover/", include("accounts.urls")), #adds all of the paths for paths needed for discover and takes the url patterns from accounts/urls.py
     path('api/auth/', include('accounts.auth_urls')),  # signup/login/logout JSON API
     path('api/profile/', include('accounts.profile_urls')),  # logged-in user's profile (first-time setup)
+    path('api/search/', include('accounts.search_urls')),  # navbar search for students and teams
 ]
