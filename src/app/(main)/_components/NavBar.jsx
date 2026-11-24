@@ -6,6 +6,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { Bell, ChevronDown, Compass, House, LogOut, Map as MapIcon, MessageCircle, Search, UserRound } from 'lucide-react';
 import { useUser } from '../../../components/AuthProvider';
 import { userProfile } from '../../../lib/auth-client.mjs';
+import { MAX_SEARCH_LENGTH } from '../../../lib/search-query.mjs';
 import { useFriendRequests } from './FriendRequestsProvider';
 import styles from '../main.module.css';
 
@@ -39,11 +40,11 @@ export default function NavBar() {
   // close it after navigating too
   useEffect(() => setMenuOpen(false), [pathname]);
 
-  // full results live on the Discover page (Story 3)
+  // student + team results live on /search, which also checks the query and shows any error
   function handleSearch(event) {
     event.preventDefault();
     const text = new FormData(event.currentTarget).get('q').trim();
-    router.push(text ? `/discover?q=${encodeURIComponent(text)}` : '/discover');
+    router.push(text ? `/search?q=${encodeURIComponent(text)}` : '/search');
   }
 
   return (
@@ -79,7 +80,13 @@ export default function NavBar() {
         <form className={styles.search} role="search" onSubmit={handleSearch}>
           <Search size={17} />
           {/* TODO(backend): suggestions dropdown from GET /api/search/suggest (Story 2.5) */}
-          <input type="search" name="q" placeholder="Players, teams, schools" aria-label="Search players, teams, schools" />
+          <input
+            type="search"
+            name="q"
+            placeholder="Students or teams"
+            aria-label="Search students or teams"
+            maxLength={MAX_SEARCH_LENGTH}
+          />
         </form>
 
         <div className={styles.account} ref={menuRef}>
